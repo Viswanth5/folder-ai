@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Folder AI | Intelligent Project Structure Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <style>
+        :root {
+            --bg: #0c1222;
+            --fg: #e8ecf4;
+            --muted: #64748b;
+            --accent: #38bdf8;
+            --accent-dim: rgba(56,189,248,0.15);
+            --card: rgba(15,23,42,0.75);
+            --border: rgba(255,255,255,0.08);
+            --glow: rgba(56,189,248,0.35);
+        }
+        * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
+        body {
+            background: var(--bg);
+            color: var(--fg);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        .bg-atmosphere {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+        }
+        .bg-blob {
+            position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.18;
+            animation: blobDrift 18s ease-in-out infinite alternate;
+        }
+        .bg-blob--1 { width: 600px; height: 600px; background: #0ea5e9; top: -10%; left: -8%; animation-delay: 0s; }
+        .bg-blob--2 { width: 500px; height: 500px; background: #8b5cf6; bottom: -5%; right: -6%; animation-delay: -6s; }
+        .bg-blob--3 { width: 350px; height: 350px; background: #ec4899; top: 40%; left: 55%; animation-delay: -12s; opacity: 0.1; }
+        @keyframes blobDrift {
+            0%   { transform: translate(0, 0) scale(1); }
+            33%  { transform: translate(30px, -40px) scale(1.05); }
+            66%  { transform: translate(-20px, 20px) scale(0.95); }
+            100% { transform: translate(10px, -10px) scale(1.02); }
+        }
+        .bg-grid {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 28px 28px;
+        }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(56,189,248,0.4); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+        .glass-card {
+            background: var(--card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+        }
+        .tree-node { transition: all 0.15s ease; }
+        .folder-item, .file-item {
+            transition: background 0.12s, transform 0.12s;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            user-select: none;
+        }
+        .folder-item:hover, .file-item:hover {
+            background: rgba(255,255,255,0.06);
+            transform: translateX(2px);
+        }
+        .folder-item:active, .file-item:active { transform: scale(0.98); }
+        .nested-list {
+            margin-left: 1.25rem;
+            padding-left: 0.75rem;
+            border-left: 1px dashed rgba(148,163,184,0.2);
+            transition: all 0.25s;
+        }
+        .tree-icon { width: 1.25rem; text-align: center; margin-right: 0.5rem; flex-shrink: 0; }
+        .btn-primary {
+            background: linear-gradient(135deg, #0ea5e9, #6366f1);
+            box-shadow: 0 0 12px var(--glow);
+            transition: all 0.2s;
+        }
+        .btn-primary:hover {
+            box-shadow: 0 0 24px var(--glow);
+            transform: translateY(-1px);
+        }
+        .btn-primary:active { transform: scale(0.97); }
+        .btn-ghost {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+        .btn-ghost:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.15);
+        }
+        .feature-tag {
+            background: var(--accent-dim);
+            border: 1px solid rgba(56,189,248,0.25);
+        }
+        .stat-pill {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+        }
+        .toast-container {
+            position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+            z-index: 9999; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+            pointer-events: none;
+        }
+        .toast {
+            pointer-events: auto;
+            padding: 0.6rem 1.25rem; border-radius: 9999px;
+            font-size: 0.8rem; font-weight: 500;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            animation: toastIn 0.35s cubic-bezier(0.2,0.9,0.4,1.1);
+        }
+        .toast--success { background: rgba(16,185,129,0.9); color: #fff; }
+        .toast--error { background: rgba(239,68,68,0.9); color: #fff; }
+        .toast--info { background: rgba(56,189,248,0.9); color: #0c1222; }
+        .toast--exit { animation: toastOut 0.3s ease forwards; }
+        @keyframes toastIn { from { opacity:0; transform:translateY(16px) scale(0.95); } to { opacity:1; transform:translateY(0) scale(1); } }
+        @keyframes toastOut { to { opacity:0; transform:translateY(10px) scale(0.95); } }
+        .loader {
+            border: 3px solid rgba(56,189,248,0.15);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            width: 48px; height: 48px;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .search-input {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+        .search-input:focus {
+            background: rgba(255,255,255,0.07);
+            border-color: rgba(56,189,248,0.4);
+            box-shadow: 0 0 0 3px rgba(56,189,248,0.1);
+        }
+        .pulse-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #10b981;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%,100%{ opacity:1; transform:scale(1); } 50%{ opacity:0.5; transform:scale(1.3); } }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-atmosphere" aria-hidden="true">
+        <div class="bg-blob bg-blob--1"></div>
+        <div class="bg-blob bg-blob--2"></div>
+        <div class="bg-blob bg-blob--3"></div>
+    </div>
+    <div class="bg-grid" aria-hidden="true"></div>
+
+    <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+    <div id="loadingOverlay" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div class="glass-card rounded-2xl p-8 flex flex-col items-center gap-4 max-w-sm mx-4">
+            <div class="loader"></div>
+            <p class="text-white font-semibold">Analyzing your project...</p>
+            <p class="text-xs text-gray-400">Parsing intent and generating hierarchy</p>
+        </div>
+    </div>
+
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-14">
+        <header class="text-center mb-10 md:mb-14">
+            <div class="inline-flex items-center gap-2.5 bg-white/5 backdrop-blur-sm px-4 py-1.5 rounded-full border border-white/10 mb-5">
+                <div class="pulse-dot"></div>
+                <span class="text-xs font-semibold tracking-widest uppercase text-sky-300">AI-Powered Architecture</span>
+            </div>
+            <h1 id="heroTitle" class="text-5xl md:text-7xl font-extrabold mb-4 leading-none">
+                <span class="bg-gradient-to-r from-sky-300 via-blue-200 to-violet-300 bg-clip-text text-transparent">Folder</span>
+                <span class="bg-gradient-to-r from-violet-300 to-pink-300 bg-clip-text text-transparent"> AI</span>
+            </h1>
+            <p class="text-gray-400 text-lg max-w-xl mx-auto leading-relaxed">
+                Describe your project in natural language and get a production-ready folder structure, tech stack breakdown, and file hierarchy — instantly.
+            </p>
+        </header>
+
+        <section class="glass-card rounded-2xl p-5 md:p-7 shadow-2xl mb-8" aria-label="Project prompt input">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <div class="flex-1">
+                    <label for="promptInput" class="block text-sm font-semibold text-sky-200 mb-2 flex items-center gap-2">
+                        <i class="fas fa-comment-dots"></i> Project prompt
+                    </label>
+                    <textarea id="promptInput" rows="4"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500/50 transition resize-none text-sm leading-relaxed"
+                        placeholder="e.g., &quot;Create a MERN stack e-commerce platform with authentication, dashboard, and payment integration&quot;"
+                        aria-describedby="promptHint">Create a MERN stack project with authentication and dashboard</textarea>
+                    <div id="promptHint" class="sr-only">Describe the project you want to generate a folder structure for</div>
+                    <div class="flex flex-wrap items-center justify-between gap-3 mt-4">
+                        <div class="flex items-center gap-3">
+                            <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300 hover:text-gray-100 transition">
+                                <input type="checkbox" id="demoModeCheckbox" class="w-4 h-4 rounded border-gray-600 bg-white/5 text-sky-500 focus:ring-sky-500 focus:ring-offset-0 cursor-pointer">
+                                <span><i class="fas fa-flask mr-1 text-sky-400"></i>Demo mode</span>
+                            </label>
+                            <button id="exampleBtn" class="btn-ghost text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-gray-300" aria-label="Fill with a sample prompt">
+                                <i class="fas fa-shuffle"></i> Random sample
+                            </button>
+                        </div>
+                        <button id="generateBtn" class="btn-primary text-white font-semibold py-2.5 px-7 rounded-xl flex items-center gap-2">
+                            <i class="fas fa-wand-magic-sparkles"></i> Generate
+                        </button>
+                    </div>
+                </div>
+                <div class="lg:w-56 flex flex-col justify-center border-t lg:border-t-0 lg:border-l border-white/10 pt-4 lg:pt-0 lg:pl-6">
+                    <div class="text-xs text-sky-300 mb-2 font-semibold uppercase tracking-wider flex items-center gap-1"><i class="fas fa-microchip"></i> AI understands</div>
+                    <ul class="text-xs text-gray-400 space-y-1.5">
+                        <li class="flex items-start gap-2"><i class="fas fa-check text-emerald-400 mt-0.5 text-[10px]"></i>Frontend & backend frameworks</li>
+                        <li class="flex items-start gap-2"><i class="fas fa-check text-emerald-400 mt-0.5 text-[10px]"></i>Databases & ORMs</li>
+                        <li class="flex items-start gap-2"><i class="fas fa-check text-emerald-400 mt-0.5 text-[10px]"></i>Auth, APIs, dashboards</li>
+                        <li class="flex items-start gap-2"><i class="fas fa-check text-emerald-400 mt-0.5 text-[10px]"></i>Fullstack, frontend, or backend</li>
+                    </ul>
+                    <div class="mt-3 text-[11px] text-slate-500 italic flex items-center gap-1"><i class="fas fa-folder-download"></i> Download folder as ZIP after generation</div>
+                </div>
+            </div>
+        </section>
+
+        <div id="resultsSection" class="mt-6 space-y-6 hidden"></div>
+        <div id="emptyState" class="text-center py-20 glass-card rounded-2xl mt-6 border border-dashed border-white/10">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/5 mb-4">
+                <i class="fas fa-folder-tree text-3xl text-sky-400/50"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-white/70">No structure generated yet</h3>
+            <p class="text-gray-500 max-w-sm mx-auto mt-2 text-sm">Enter a project description and click Generate to see an AI-crafted folder hierarchy.</p>
+            <p class="text-gray-600 text-xs mt-4"><kbd class="bg-white/5 px-1.5 py-0.5 rounded text-[11px] border border-white/10">Ctrl</kbd> + <kbd class="bg-white/5 px-1.5 py-0.5 rounded text-[11px] border border-white/10">Enter</kbd> to generate</p>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        'use strict';
+
+        const promptInput       = document.getElementById('promptInput');
+        const generateBtn       = document.getElementById('generateBtn');
+        const demoModeCheckbox  = document.getElementById('demoModeCheckbox');
+        const exampleBtn        = document.getElementById('exampleBtn');
+        const loadingOverlay    = document.getElementById('loadingOverlay');
+        const resultsSection    = document.getElementById('resultsSection');
+        const emptyState        = document.getElementById('emptyState');
+        const toastContainer    = document.getElementById('toastContainer');
+
+        function showToast(message, type) {
+            type = type || 'info';
+            const el = document.createElement('div');
+            el.className = 'toast toast--' + type;
+            el.textContent = message;
+            toastContainer.appendChild(el);
+            setTimeout(function() {
+                el.classList.add('toast--exit');
+                el.addEventListener('animationend', function() { el.remove(); });
+            }, 2800);
+        }
+
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const map = {
+                'js':   ['fab fa-js',        'text-yellow-400'],
+                'jsx':  ['fab fa-react',      'text-cyan-400'],
+                'ts':   ['fas fa-code',       'text-blue-400'],
+                'tsx':  ['fab fa-react',      'text-cyan-300'],
+                'py':   ['fab fa-python',     'text-yellow-300'],
+                'rb':   ['fas fa-gem',        'text-red-400'],
+                'go':   ['fab fa-golang',     'text-sky-300'],
+                'rs':   ['fas fa-gear',       'text-orange-400'],
+                'java': ['fab fa-java',       'text-red-300'],
+                'html': ['fab fa-html5',      'text-orange-500'],
+                'css':  ['fab fa-css3-alt',   'text-blue-400'],
+                'scss': ['fab fa-sass',       'text-pink-400'],
+                'json': ['fas fa-brackets-curly','text-yellow-200'],
+                'md':   ['fab fa-markdown',   'text-gray-300'],
+                'env':  ['fas fa-lock',       'text-green-400'],
+                'git':  ['fab fa-git-alt',    'text-orange-400'],
+                'yml':  ['fas fa-file-lines', 'text-pink-300'],
+                'yaml': ['fas fa-file-lines', 'text-pink-300'],
+                'txt':  ['fas fa-file-lines', 'text-gray-400'],
+                'svg':  ['fas fa-image',      'text-green-300'],
+                'png':  ['fas fa-image',      'text-green-300'],
+                'jpg':  ['fas fa-image',      'text-green-300'],
+                'ico':  ['fas fa-image',      'text-green-300'],
+                'sql':  ['fas fa-database',   'text-blue-300'],
+                'sh':   ['fas fa-terminal',   'text-green-400'],
+                'dockerfile': ['fab fa-docker','text-blue-400'],
+                'lock': ['fas fa-lock',       'text-gray-500'],
+                'toml': ['fas fa-file-code',  'text-orange-300'],
+                'cfg':  ['fas fa-cog',        'text-gray-400'],
+                'conf': ['fas fa-cog',        'text-gray-400'],
+            };
+            const special = {
+                'dockerfile':     ['fab fa-docker',   'text-blue-400'],
+                '.dockerignore':  ['fab fa-docker',   'text-blue-300'],
+                '.gitignore':     ['fab fa-git-alt',  'text-orange-400'],
+                '.env':           ['fas fa-lock',     'text-green-400'],
+                '.env.local':     ['fas fa-lock',     'text-green-400'],
+                '.env.example':   ['fas fa-lock',     'text-emerald-300'],
+                'readme.md':      ['fas fa-book',     'text-sky-300'],
+                'package.json':   ['fab fa-npm',      'text-red-400'],
+                'requirements.txt':['fab fa-python',  'text-yellow-300'],
+                'makefile':       ['fas fa-terminal',  'text-gray-300'],
+            };
+            const lowerName = filename.toLowerCase();
+            if (special[lowerName]) {
+                return '<i class="' + special[lowerName][0] + ' ' + special[lowerName][1] + '"></i>';
+            }
+            if (map[ext]) {
+                return '<i class="' + map[ext][0] + ' ' + map[ext][1] + '"></i>';
+            }
+            return '<i class="fas fa-file text-gray-500"></i>';
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.appendChild(document.createTextNode(str));
+            return div.innerHTML;
+        }
+
+        function countStructure(structureObj) {
+            let folders = 0, files = 0;
+            function walk(obj) {
+                if (!obj || typeof obj !== 'object') return;
+                for (const key in obj) {
+                    if (!obj.hasOwnProperty(key)) continue;
+                    if (obj[key] && typeof obj[key] === 'object') {
+                        folders++;
+                        walk(obj[key]);
+                    } else {
+                        files++;
+                    }
+                }
+            }
+            walk(structureObj);
+            return { folders, files };
+        }
+
+        function structureToText(structureObj, prefix = '') {
+            let lines = [];
+            if (!structureObj || typeof structureObj !== 'object') return '';
+            const keys = Object.keys(structureObj);
+            keys.forEach((name, idx) => {
+                const isLast = idx === keys.length - 1;
+                const connector = isLast ? '└── ' : '├── ';
+                const content = structureObj[name];
+                const isFolder = content && typeof content === 'object';
+                lines.push(prefix + connector + name);
+                if (isFolder) {
+                    const newPrefix = prefix + (isLast ? '    ' : '│   ');
+                    lines.push(structureToText(content, newPrefix));
+                }
+            });
+            return lines.join('\n');
+        }
+
+        function renderParsedInfo(parsed) {
+            if (!parsed) return document.createElement('div');
+            const card = document.createElement('div');
+            card.className = 'glass-card rounded-2xl p-5 md:p-6';
+            const featuresList = (parsed.features && Array.isArray(parsed.features)) ? parsed.features : [];
+            const projectType = parsed.project_type || 'unknown';
+            const frontend = parsed.frontend || '—';
+            const backend = parsed.backend || '—';
+            const database = parsed.database || '—';
+            card.innerHTML = `
+                <div class="flex flex-wrap justify-between items-center gap-3 border-b border-white/10 pb-3 mb-4">
+                    <h2 class="text-lg font-bold flex items-center gap-2"><i class="fas fa-brain text-sky-300"></i> Parsed Intent</h2>
+                    <span class="px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-sky-500/20 text-sky-200 border border-sky-400/25">${escapeHtml(projectType)}</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white/[0.03] rounded-xl p-3 border border-white/5">
+                        <div class="text-gray-500 text-[10px] uppercase tracking-widest mb-1">Frontend</div>
+                        <div class="text-base font-semibold flex items-center gap-2"><i class="fab fa-react text-cyan-400"></i> ${escapeHtml(frontend)}</div>
+                    </div>
+                    <div class="bg-white/[0.03] rounded-xl p-3 border border-white/5">
+                        <div class="text-gray-500 text-[10px] uppercase tracking-widest mb-1">Backend</div>
+                        <div class="text-base font-semibold flex items-center gap-2"><i class="fas fa-server text-emerald-400"></i> ${escapeHtml(backend)}</div>
+                    </div>
+                    <div class="bg-white/[0.03] rounded-xl p-3 border border-white/5">
+                        <div class="text-gray-500 text-[10px] uppercase tracking-widest mb-1">Database</div>
+                        <div class="text-base font-semibold flex items-center gap-2"><i class="fas fa-database text-amber-400"></i> ${escapeHtml(database)}</div>
+                    </div>
+                    <div class="bg-white/[0.03] rounded-xl p-3 border border-white/5">
+                        <div class="text-gray-500 text-[10px] uppercase tracking-widest mb-1">Features</div>
+                        <div class="flex flex-wrap gap-1.5 mt-1">${featuresList.length ? featuresList.map(f => `<span class="feature-tag text-[11px] px-2 py-0.5 rounded-full">${escapeHtml(f)}</span>`).join('') : '<span class="text-sm text-gray-500">—</span>'}</div>
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+
+        let currentStructure = null;
+
+        function buildTreeView(structureObj) {
+            if (!structureObj || typeof structureObj !== 'object') return null;
+            const container = document.createElement('ul');
+            container.className = 'space-y-1';
+            container.setAttribute('role', 'tree');
+            const keys = Object.keys(structureObj);
+            keys.forEach(name => {
+                const content = structureObj[name];
+                const isFolder = content && typeof content === 'object';
+                const li = document.createElement('li');
+                li.className = 'tree-node';
+                li.setAttribute('role', 'treeitem');
+                const divItem = document.createElement('div');
+                divItem.className = `flex items-center py-1 px-2 ${isFolder ? 'folder-item' : 'file-item'}`;
+                const iconSpan = document.createElement('span');
+                iconSpan.className = 'tree-icon';
+                if (isFolder) {
+                    iconSpan.innerHTML = '<i class="fas fa-folder-open text-amber-400"></i>';
+                    const nameSpan = document.createElement('span');
+                    nameSpan.className = 'flex items-center gap-1.5 font-medium text-gray-200';
+                    nameSpan.innerHTML = escapeHtml(name);
+                    const toggleIcon = document.createElement('i');
+                    toggleIcon.className = 'fas fa-chevron-down text-gray-500 text-[9px] transition-transform duration-200 ml-0.5';
+                    nameSpan.appendChild(toggleIcon);
+                    divItem.appendChild(iconSpan);
+                    divItem.appendChild(nameSpan);
+                    const childUl = document.createElement('ul');
+                    childUl.className = 'nested-list mt-0.5 space-y-1';
+                    childUl.setAttribute('role', 'group');
+                    const childContent = buildTreeView(content);
+                    if (childContent) childUl.appendChild(childContent);
+                    childUl.style.display = 'block';
+                    li.appendChild(divItem);
+                    li.appendChild(childUl);
+                    li.setAttribute('aria-expanded', 'true');
+                    let collapsed = false;
+                    divItem.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        collapsed = !collapsed;
+                        if (collapsed) {
+                            childUl.style.display = 'none';
+                            toggleIcon.style.transform = 'rotate(-90deg)';
+                            iconSpan.innerHTML = '<i class="fas fa-folder text-amber-500/80"></i>';
+                            li.setAttribute('aria-expanded', 'false');
+                        } else {
+                            childUl.style.display = 'block';
+                            toggleIcon.style.transform = 'rotate(0deg)';
+                            iconSpan.innerHTML = '<i class="fas fa-folder-open text-amber-400"></i>';
+                            li.setAttribute('aria-expanded', 'true');
+                        }
+                    });
+                } else {
+                    iconSpan.innerHTML = getFileIcon(name);
+                    const fileNameSpan = document.createElement('span');
+                    fileNameSpan.className = 'text-sm text-gray-300';
+                    fileNameSpan.textContent = name;
+                    divItem.appendChild(iconSpan);
+                    divItem.appendChild(fileNameSpan);
+                    li.appendChild(divItem);
+                }
+                container.appendChild(li);
+            });
+            return container;
+        }
+
+        function renderStructureTree(structure) {
+            const stats = countStructure(structure);
+            const card = document.createElement('div');
+            card.className = 'glass-card rounded-2xl p-5 md:p-6';
+            card.innerHTML = `
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3 mb-4">
+                    <div class="flex items-center gap-3">
+                        <h2 class="text-lg font-bold flex items-center gap-2"><i class="fas fa-sitemap text-sky-300"></i> Folder Hierarchy</h2>
+                        <div class="flex items-center gap-2 text-[11px]">
+                            <span class="stat-pill px-2 py-0.5 rounded-full flex items-center gap-1"><i class="fas fa-folder text-amber-400"></i> ${stats.folders}</span>
+                            <span class="stat-pill px-2 py-0.5 rounded-full flex items-center gap-1"><i class="fas fa-file text-sky-400"></i> ${stats.files}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input id="treeSearch" type="text" placeholder="Filter files..." class="search-input text-xs rounded-lg px-3 py-1.5 w-36 focus:outline-none text-white placeholder-gray-500" aria-label="Filter files in tree">
+                        <button id="expandAllBtn" class="btn-ghost text-[11px] px-2.5 py-1.5 rounded-lg text-gray-400" title="Expand all"><i class="fas fa-angles-down"></i></button>
+                        <button id="collapseAllBtn" class="btn-ghost text-[11px] px-2.5 py-1.5 rounded-lg text-gray-400" title="Collapse all"><i class="fas fa-angles-up"></i></button>
+                        <button id="copyTextBtn" class="btn-ghost text-[11px] px-2.5 py-1.5 rounded-lg text-gray-400" title="Copy as text"><i class="fas fa-copy"></i></button>
+                        <button id="downloadFolderBtn" class="btn-ghost text-[11px] px-2.5 py-1.5 rounded-lg text-green-400" title="Download folder as ZIP"><i class="fas fa-folder-download"></i></button>
+                        <button id="downloadJsonBtn" class="btn-ghost text-[11px] px-2.5 py-1.5 rounded-lg text-gray-400" title="Download JSON"><i class="fas fa-download"></i></button>
+                    </div>
+                </div>
+                <div id="dynamicTreeContainer" class="overflow-auto max-h-[65vh] pr-2 font-mono text-sm leading-relaxed"></div>
+            `;
+            const treeContainer = card.querySelector('#dynamicTreeContainer');
+            if (structure && Object.keys(structure).length > 0) {
+                const treeView = buildTreeView(structure);
+                if (treeView) treeContainer.appendChild(treeView);
+            }
+            // Toolbar events
+            card.querySelector('#expandAllBtn').addEventListener('click', () => {
+                card.querySelectorAll('.nested-list').forEach(ul => { ul.style.display = 'block'; });
+                card.querySelectorAll('.folder-item').forEach(fi => {
+                    const iconSpan = fi.querySelector('.tree-icon');
+                    if (iconSpan) iconSpan.innerHTML = '<i class="fas fa-folder-open text-amber-400"></i>';
+                    const chevron = fi.querySelector('.fa-chevron-down, .fa-chevron-right');
+                    if (chevron) chevron.style.transform = 'rotate(0deg)';
+                });
+                card.querySelectorAll('[aria-expanded]').forEach(li => li.setAttribute('aria-expanded', 'true'));
+            });
+            card.querySelector('#collapseAllBtn').addEventListener('click', () => {
+                card.querySelectorAll('.nested-list').forEach(ul => { ul.style.display = 'none'; });
+                card.querySelectorAll('.folder-item').forEach(fi => {
+                    const iconSpan = fi.querySelector('.tree-icon');
+                    if (iconSpan) iconSpan.innerHTML = '<i class="fas fa-folder text-amber-500/80"></i>';
+                    const chevron = fi.querySelector('.fa-chevron-down, .fa-chevron-right');
+                    if (chevron) chevron.style.transform = 'rotate(-90deg)';
+                });
+                card.querySelectorAll('[aria-expanded]').forEach(li => li.setAttribute('aria-expanded', 'false'));
+            });
+            card.querySelector('#copyTextBtn').addEventListener('click', () => {
+                const text = structureToText(currentStructure);
+                navigator.clipboard.writeText(text).then(() => showToast('Structure copied to clipboard', 'success')).catch(() => showToast('Failed to copy', 'error'));
+            });
+            // Download folder as ZIP
+            card.querySelector('#downloadFolderBtn').addEventListener('click', async () => {
+                try {
+                    const response = await fetch('/download');
+                    if (!response.ok) throw new Error('Download failed');
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'project.zip';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                    showToast('Project folder downloaded as ZIP', 'success');
+                } catch (err) {
+                    console.error(err);
+                    showToast('No folder generated yet. Generate a project first.', 'error');
+                }
+            });
+            // Download JSON
+            card.querySelector('#downloadJsonBtn').addEventListener('click', () => {
+                const json = JSON.stringify(currentStructure, null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = 'folder-structure.json'; a.click();
+                URL.revokeObjectURL(url);
+                showToast('JSON downloaded', 'success');
+            });
+            const searchInput = card.querySelector('#treeSearch');
+            searchInput.addEventListener('input', function() {
+                const query = this.value.toLowerCase().trim();
+                const allItems = card.querySelectorAll('.tree-node');
+                if (!query) {
+                    allItems.forEach(node => { node.style.display = ''; });
+                    return;
+                }
+                allItems.forEach(node => {
+                    const textEl = node.querySelector(':scope > div span');
+                    if (!textEl) return;
+                    const name = textEl.textContent.toLowerCase();
+                    let isMatch = name.includes(query);
+                    let descendantMatch = false;
+                    node.querySelectorAll('.tree-node').forEach(desc => {
+                        const descText = desc.querySelector(':scope > div span');
+                        if (descText && descText.textContent.toLowerCase().includes(query)) descendantMatch = true;
+                    });
+                    if (isMatch || descendantMatch) {
+                        node.style.display = '';
+                        let parent = node.parentElement;
+                        while (parent) {
+                            if (parent.classList && parent.classList.contains('nested-list')) parent.style.display = 'block';
+                            if (parent.classList && parent.classList.contains('tree-node')) parent.style.display = '';
+                            parent = parent.parentElement;
+                        }
+                    } else {
+                        node.style.display = 'none';
+                    }
+                });
+            });
+            return card;
+        }
+
+        // ----- Demo mode generator (original, kept as is) -----
+        function getDemoResponse(promptText) {
+            const lower = promptText.toLowerCase();
+            let frontend = 'React', backend = 'Node.js', database = 'MongoDB';
+            let features = [];
+            if (lower.includes('vue')) frontend = 'Vue.js';
+            else if (lower.includes('angular')) frontend = 'Angular';
+            else if (lower.includes('svelte')) frontend = 'Svelte';
+            else if (lower.includes('next')) frontend = 'Next.js';
+            if (lower.includes('flask') || lower.includes('python')) { backend = 'Flask'; database = 'PostgreSQL'; }
+            else if (lower.includes('django')) { backend = 'Django'; database = 'PostgreSQL'; }
+            else if (lower.includes('express')) backend = 'Express';
+            else if (lower.includes('fastapi')) { backend = 'FastAPI'; database = 'PostgreSQL'; }
+            else if (lower.includes('spring')) { backend = 'Spring Boot'; database = 'MySQL'; }
+            else if (lower.includes('rails')) { backend = 'Ruby on Rails'; database = 'PostgreSQL'; }
+            if (lower.includes('postgres')) database = 'PostgreSQL';
+            if (lower.includes('mysql')) database = 'MySQL';
+            if (lower.includes('sqlite')) database = 'SQLite';
+            if (lower.includes('firebase')) database = 'Firebase';
+            if (lower.includes('auth')) features.push('authentication');
+            if (lower.includes('dashboard')) features.push('dashboard');
+            if (lower.includes('payment') || lower.includes('stripe')) features.push('payments');
+            if (lower.includes('api')) features.push('REST API');
+            if (lower.includes('real-time') || lower.includes('socket') || lower.includes('chat')) features.push('real-time');
+            if (lower.includes('upload') || lower.includes('image')) features.push('file upload');
+            if (lower.includes('email') || lower.includes('notif')) features.push('notifications');
+            if (lower.includes('admin')) features.push('admin panel');
+            if (lower.includes('crud')) features.push('CRUD');
+            if (lower.includes('test')) features.push('testing');
+            if (lower.includes('deploy') || lower.includes('docker')) features.push('deployment');
+            if (lower.includes('swagger') || lower.includes('docs')) features.push('API docs');
+            if (features.length === 0) features = ['authentication', 'dashboard'];
+            const isFlask = backend === 'Flask' || backend === 'FastAPI' || backend === 'Django';
+            const isRails = backend === 'Ruby on Rails';
+            const isSpring = backend === 'Spring Boot';
+            let structure = {};
+            structure['.gitignore'] = null;
+            structure['README.md'] = null;
+            if (isFlask) {
+                structure.server = { app: { '__init__.py': null, 'routes.py': null, 'models.py': null } };
+                if (features.includes('authentication')) structure.server.app.auth = { '__init__.py': null, 'routes.py': null, 'utils.py': null };
+                structure.server.app.api = { '__init__.py': null, 'v1': { '__init__.py': null } };
+                structure.server.config = { '__init__.py': null, 'settings.py': null, 'development.py': null, 'production.py': null };
+                structure.server.migrations = { 'env.py': null, 'versions': {} };
+                structure.server.tests = { '__init__.py': null, 'conftest.py': null, 'test_routes.py': null };
+                structure.server['requirements.txt'] = null;
+                structure.server['run.py'] = null;
+                if (features.includes('deployment')) structure.server.Dockerfile = null;
+            } else if (isRails) {
+                structure.app = { controllers: {}, models: {}, views: {}, helpers: {}, mailers: {} };
+                structure.config = { 'routes.rb': null, 'database.yml': null };
+                structure.db = { migrate: {}, 'schema.rb': null };
+                structure.test = {};
+                structure['Gemfile'] = null;
+            } else if (isSpring) {
+                structure.server = { src: { main: { java: { com: { project: { 'Application.java': null, controller: {}, service: {}, repository: {}, model: {}, config: {} } } }, resources: { 'application.properties': null } }, test: {} } };
+                structure.server['pom.xml'] = null;
+            } else {
+                structure.client = {
+                    'src': {
+                        components: { common: {}, layout: {} },
+                        pages: {},
+                        hooks: {},
+                        utils: {},
+                        services: {},
+                        styles: { 'globals.css': null },
+                        'App.jsx': null,
+                        'main.jsx': null
+                    },
+                    'public': { 'index.html': null, 'favicon.ico': null },
+                    'package.json': null,
+                    'vite.config.js': null,
+                    '.env': null
+                };
+                if (features.includes('authentication')) {
+                    structure.client.src.pages['Login.jsx'] = null;
+                    structure.client.src.pages['Register.jsx'] = null;
+                    structure.client.src.components['ProtectedRoute.jsx'] = null;
+                }
+                if (features.includes('dashboard')) {
+                    structure.client.src.pages['Dashboard.jsx'] = null;
+                    structure.client.src.components['Sidebar.jsx'] = null;
+                    structure.client.src.components['StatsCard.jsx'] = null;
+                }
+                structure.server = {
+                    src: {
+                        controllers: { 'authController.js': null },
+                        models: { 'User.js': null },
+                        routes: { 'authRoutes.js': null, 'index.js': null },
+                        middleware: { 'auth.js': null, 'errorHandler.js': null },
+                        config: { 'db.js': null },
+                        utils: {},
+                        'app.js': null,
+                        'server.js': null
+                    },
+                    'package.json': null,
+                    '.env': null
+                };
+                if (features.includes('payments')) {
+                    structure.server.src.controllers['paymentController.js'] = null;
+                    structure.server.src.routes['paymentRoutes.js'] = null;
+                }
+                if (features.includes('real-time')) {
+                    structure.server.src['sockets'] = { 'handler.js': null };
+                }
+                if (features.includes('file upload')) {
+                    structure.server.src.middleware['upload.js'] = null;
+                    structure.uploads = { '.gitkeep': null };
+                }
+                if (features.includes('API docs')) {
+                    structure.server.src.config['swagger.js'] = null;
+                }
+            }
+            if (features.includes('deployment')) structure['docker-compose.yml'] = null;
+            if (features.includes('testing') && !isFlask && !isRails && !isSpring) {
+                structure.tests = { 'auth.test.js': null, 'api.test.js': null, 'setup.js': null };
+            }
+            return {
+                success: true,
+                parsed_prompt: {
+                    project_type: (frontend && backend) ? 'fullstack' : (frontend ? 'frontend' : 'backend'),
+                    frontend: frontend,
+                    backend: backend,
+                    database: database,
+                    features: features
+                },
+                structure: structure
+            };
+        }
+
+        // Live API call (relative URL, works because frontend is served from Flask)
+        async function callLiveAPI(prompt) {
+            const response = await fetch('/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: prompt })
+            });
+            if (!response.ok) {
+                let errMsg = 'HTTP ' + response.status;
+                try {
+                    const errData = await response.json();
+                    errMsg = errData.message || errMsg;
+                } catch(e) {}
+                throw new Error('Server error: ' + errMsg);
+            }
+            const data = await response.json();
+            if (!data.success) throw new Error(data.message || 'Generation failed');
+            return data;
+        }
+
+        async function handleGenerate() {
+            const prompt = promptInput.value.trim();
+            if (!prompt) {
+                showToast('Please enter a project description', 'error');
+                promptInput.focus();
+                return;
+            }
+            const useDemo = demoModeCheckbox.checked;
+            loadingOverlay.classList.remove('hidden');
+            try {
+                let resultData;
+                if (useDemo) {
+                    await new Promise(r => setTimeout(r, 700));
+                    resultData = getDemoResponse(prompt);
+                } else {
+                    resultData = await callLiveAPI(prompt);
+                }
+                const structure = resultData.structure || {};
+                const parsed = resultData.parsed_prompt || { project_type: 'fullstack', frontend: 'React', backend: 'Node.js', database: 'MongoDB', features: [] };
+                currentStructure = structure;
+                resultsSection.innerHTML = '';
+                const parsedCard = renderParsedInfo(parsed);
+                const treeCard = renderStructureTree(structure);
+                resultsSection.appendChild(parsedCard);
+                resultsSection.appendChild(treeCard);
+                emptyState.classList.add('hidden');
+                resultsSection.classList.remove('hidden');
+                gsap.fromTo(parsedCard, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' });
+                gsap.fromTo(treeCard, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.45, delay: 0.08, ease: 'power2.out' });
+                const items = treeCard.querySelectorAll('.folder-item, .file-item');
+                if (items.length < 80) {
+                    gsap.fromTo(items, { opacity: 0, x: -6 }, { opacity: 1, x: 0, stagger: 0.015, duration: 0.25, delay: 0.15 });
+                }
+                const stats = countStructure(structure);
+                showToast(`Structure generated — ${stats.files} files, ${stats.folders} folders`, 'success');
+            } catch (err) {
+                console.error(err);
+                resultsSection.innerHTML = '';
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'glass-card rounded-2xl p-6 border border-red-500/30 text-center';
+                errorDiv.innerHTML = `
+                    <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-red-500/10 mb-4"><i class="fas fa-circle-exclamation text-3xl text-red-400"></i></div>
+                    <h3 class="text-lg font-semibold mb-2">Generation failed</h3>
+                    <p class="text-gray-400 text-sm max-w-md mx-auto">${escapeHtml(err.message || 'Could not connect to backend. Enable Demo Mode to preview.')}</p>
+                    <button id="toggleDemoHint" class="mt-5 btn-primary text-white font-medium py-2 px-5 rounded-xl text-sm inline-flex items-center gap-2"><i class="fas fa-flask"></i> Retry in Demo Mode</button>
+                `;
+                resultsSection.appendChild(errorDiv);
+                emptyState.classList.add('hidden');
+                resultsSection.classList.remove('hidden');
+                const toggleBtn = errorDiv.querySelector('#toggleDemoHint');
+                if (toggleBtn) {
+                    toggleBtn.addEventListener('click', () => {
+                        demoModeCheckbox.checked = true;
+                        handleGenerate();
+                    });
+                }
+                gsap.fromTo(errorDiv, { scale: 0.96, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.35 });
+            } finally {
+                loadingOverlay.classList.add('hidden');
+            }
+        }
+
+        const examplePrompts = [
+            'Create a MERN stack e-commerce platform with authentication, dashboard, and Stripe payments',
+            'Build a Flask + React fullstack app with PostgreSQL, login system, and REST API',
+            'Generate a Next.js 14 portfolio with Tailwind, dark mode, and blog',
+            'Node.js REST API with MongoDB, JWT authentication, Swagger docs, and Docker',
+            'Django backend with PostgreSQL, admin panel, authentication, and file upload',
+            'Vue 3 + Express project with real-time chat using Socket.io',
+            'SvelteKit SaaS app with Stripe subscriptions and Firebase auth',
+            'FastAPI microservice with Redis caching, JWT auth, and Docker deployment',
+        ];
+        let exampleIndex = 0;
+        function fillExamplePrompt() {
+            promptInput.value = examplePrompts[exampleIndex % examplePrompts.length];
+            exampleIndex++;
+            gsap.fromTo(promptInput, { scale: 1 }, { scale: 1.005, duration: 0.15, yoyo: true, repeat: 1 });
+        }
+
+        generateBtn.addEventListener('click', handleGenerate);
+        exampleBtn.addEventListener('click', fillExamplePrompt);
+        promptInput.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                handleGenerate();
+            }
+        });
+
+        resultsSection.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+
+        gsap.fromTo('#heroTitle', { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.7, ease: 'back.out(1.2)' });
+        gsap.fromTo('header p', { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.5, delay: 0.15 });
+        gsap.fromTo('section.glass-card', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, delay: 0.25 });
+        gsap.fromTo('#emptyState', { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.5, delay: 0.35 });
+    })();
+    </script>
+</body>
+</html>
