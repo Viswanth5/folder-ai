@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+ai_models/server.log
+ai_models/generated_project/
+generated_project/
+templates/index2.html
+templates/image.png

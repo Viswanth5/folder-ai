@@ -176,7 +176,7 @@
             </div>
             <h1 id="heroTitle" class="text-5xl md:text-7xl font-extrabold mb-4 leading-none">
                 <span class="bg-gradient-to-r from-sky-300 via-blue-200 to-violet-300 bg-clip-text text-transparent">Folder</span>
-                <span class="bg-gradient-to-r from-violet-300 to-pink-300 bg-clip-text text-transparent"> AI</span>
+                <span class="bg-gradient-to-r from-violet-300 to-pink-300 bg-clip-text text-transparent"> AI v2</span>
             </h1>
             <p class="text-gray-400 text-lg max-w-xl mx-auto leading-relaxed">
                 Describe your project in natural language and get a production-ready folder structure, tech stack breakdown, and file hierarchy — instantly.
@@ -217,7 +217,7 @@
                         <li class="flex items-start gap-2"><i class="fas fa-check text-emerald-400 mt-0.5 text-[10px]"></i>Auth, APIs, dashboards</li>
                         <li class="flex items-start gap-2"><i class="fas fa-check text-emerald-400 mt-0.5 text-[10px]"></i>Fullstack, frontend, or backend</li>
                     </ul>
-                    <div class="mt-3 text-[11px] text-slate-500 italic flex items-center gap-1"><i class="fas fa-folder-download"></i> Download folder as ZIP after generation</div>
+                    <div class="mt-3 text-[11px] text-slate-500 italic flex items-center gap-1"><i class="fas fa-download"></i> Download folder as ZIP after generation</div>
                 </div>
             </div>
         </section>
@@ -256,6 +256,13 @@
                 el.classList.add('toast--exit');
                 el.addEventListener('animationend', function() { el.remove(); });
             }, 2800);
+        }
+
+        function getApiUrl(path) {
+            if (window.location.port !== '5000') {
+                return 'http://127.0.0.1:5000' + path;
+            }
+            return path;
         }
 
         function getFileIcon(filename) {
@@ -477,8 +484,8 @@
                         <button id="expandAllBtn" class="btn-ghost text-[11px] px-2.5 py-1.5 rounded-lg text-gray-400" title="Expand all"><i class="fas fa-angles-down"></i></button>
                         <button id="collapseAllBtn" class="btn-ghost text-[11px] px-2.5 py-1.5 rounded-lg text-gray-400" title="Collapse all"><i class="fas fa-angles-up"></i></button>
                         <button id="copyTextBtn" class="btn-ghost text-[11px] px-2.5 py-1.5 rounded-lg text-gray-400" title="Copy as text"><i class="fas fa-copy"></i></button>
-                        <button id="downloadFolderBtn" class="btn-ghost text-[11px] px-2.5 py-1.5 rounded-lg text-green-400" title="Download folder as ZIP"><i class="fas fa-folder-download"></i></button>
-                        <button id="downloadJsonBtn" class="btn-ghost text-[11px] px-2.5 py-1.5 rounded-lg text-gray-400" title="Download JSON"><i class="fas fa-download"></i></button>
+                        <button id="downloadFolderBtn" class="btn-ghost text-[11px] px-2.5 py-1.5 rounded-lg text-green-400" title="Download folder as ZIP"><i class="fas fa-download"></i></button>
+                        <button id="downloadJsonBtn" class="btn-ghost text-[11px] px-2.5 py-1.5 rounded-lg text-gray-400" title="Download JSON structure"><i class="fas fa-file-code"></i></button>
                     </div>
                 </div>
                 <div id="dynamicTreeContainer" class="overflow-auto max-h-[65vh] pr-2 font-mono text-sm leading-relaxed"></div>
@@ -513,25 +520,30 @@
                 const text = structureToText(currentStructure);
                 navigator.clipboard.writeText(text).then(() => showToast('Structure copied to clipboard', 'success')).catch(() => showToast('Failed to copy', 'error'));
             });
-            // Download folder as ZIP
-            card.querySelector('#downloadFolderBtn').addEventListener('click', async () => {
-                try {
-                    const response = await fetch('/download');
-                    if (!response.ok) throw new Error('Download failed');
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'project.zip';
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    window.URL.revokeObjectURL(url);
-                    showToast('Project folder downloaded as ZIP', 'success');
-                } catch (err) {
-                    console.error(err);
+            // Download folder as ZIP using hidden form submission (most reliable method)
+            card.querySelector('#downloadFolderBtn').addEventListener('click', () => {
+                if (!currentStructure) {
                     showToast('No folder generated yet. Generate a project first.', 'error');
+                    return;
                 }
+                // Create a hidden form that POSTs the structure to /download
+                // The browser natively handles the ZIP response as a file download
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = getApiUrl('/download');
+                form.style.display = 'none';
+
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'structure_json';
+                input.value = JSON.stringify(currentStructure);
+                form.appendChild(input);
+
+                document.body.appendChild(form);
+                form.submit();
+                form.remove();
+
+                showToast('Project folder downloading as ZIP...', 'success');
             });
             // Download JSON
             card.querySelector('#downloadJsonBtn').addEventListener('click', () => {
@@ -709,13 +721,13 @@
 
         // Live API call (relative URL, works because frontend is served from Flask)
         async function callLiveAPI(prompt) {
-            const response = await fetch('/generate', {
+            const response = await fetch(getApiUrl('/generate'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ prompt: prompt })
             });
             if (!response.ok) {
-                let errMsg = 'HTTP ' + response.status;
+                let errMsg = `HTTP ${response.status} (${response.statusText || 'No Status Text'}) on POST ${response.url}`;
                 try {
                     const errData = await response.json();
                     errMsg = errData.message || errMsg;
