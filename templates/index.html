@@ -200,6 +200,8 @@
     </style>
 </head>
 <body>
+    <!-- Glowing Preloader Progress Bar -->
+    <div id="topProgressBar" class="fixed top-0 left-0 h-[3px] bg-gradient-to-r from-sky-400 via-indigo-500 to-pink-500 z-50 transition-all duration-300 ease-out" style="width: 0%; box-shadow: 0 0 10px rgba(56, 189, 248, 0.8);"></div>
 
     <div class="bg-atmosphere" aria-hidden="true">
         <div class="bg-blob bg-blob--1"></div>
@@ -233,44 +235,47 @@
             </p>
         </header>
 
-        <section class="glass-card rounded-2xl p-5 md:p-7 shadow-2xl mb-8" aria-label="Project prompt input">
-            <div class="flex flex-col lg:flex-row gap-6">
-                <div class="flex-1">
-                    <label for="promptInput" class="block text-sm font-semibold text-sky-200 mb-2 flex items-center gap-2">
-                        <i class="fas fa-comment-dots"></i> Project prompt
-                    </label>
-                    <textarea id="promptInput" rows="4"
-                        class="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500/50 transition resize-none text-sm leading-relaxed"
-                        placeholder="e.g., &quot;Create a MERN stack e-commerce platform with authentication, dashboard, and payment integration&quot;"
-                        aria-describedby="promptHint">Create a MERN stack project with authentication and dashboard</textarea>
-                    <div id="promptHint" class="sr-only">Describe the project you want to generate a folder structure for</div>
-                    <div class="flex flex-wrap items-center justify-between gap-3 mt-4">
-                        <div class="flex items-center gap-3">
-                            <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300 hover:text-gray-100 transition">
-                                <input type="checkbox" id="demoModeCheckbox" class="w-4 h-4 rounded border-gray-600 bg-white/5 text-sky-500 focus:ring-sky-500 focus:ring-offset-0 cursor-pointer">
-                                <span><i class="fas fa-flask mr-1 text-sky-400"></i>Demo mode</span>
-                            </label>
-                            <button id="exampleBtn" class="btn-ghost text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-gray-300" aria-label="Fill with a sample prompt">
-                                <i class="fas fa-shuffle"></i> Random sample
+        <!-- Ultra-Luxury Workspace Prompt Wrapper -->
+        <div class="relative group p-[1px] rounded-2xl bg-gradient-to-r from-white/10 via-white/5 to-white/10 focus-within:from-sky-500 focus-within:via-indigo-500 focus-within:to-purple-500 transition-all duration-500 shadow-2xl mb-8">
+            <section class="glass-card rounded-[15px] p-5 md:p-7" aria-label="Project prompt input" style="border: none; box-shadow: none;">
+                <div class="flex flex-col lg:flex-row gap-6">
+                    <div class="flex-1">
+                        <label for="promptInput" class="block text-sm font-semibold text-sky-200 mb-2 flex items-center gap-2">
+                            <i class="fas fa-comment-dots"></i> Project prompt
+                        </label>
+                        <textarea id="promptInput" rows="4"
+                            class="w-full bg-white/5 border border-white/5 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none transition resize-none text-sm leading-relaxed"
+                            placeholder="e.g., &quot;Create a MERN stack e-commerce platform with authentication, dashboard, and payment integration&quot;"
+                            aria-describedby="promptHint">Create a MERN stack project with authentication and dashboard</textarea>
+                        <div id="promptHint" class="sr-only">Describe the project you want to generate a folder structure for</div>
+                        <div class="flex flex-wrap items-center justify-between gap-3 mt-4">
+                            <div class="flex items-center gap-3">
+                                <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300 hover:text-gray-100 transition">
+                                    <input type="checkbox" id="demoModeCheckbox" class="w-4 h-4 rounded border-gray-600 bg-white/5 text-sky-500 focus:ring-sky-500 focus:ring-offset-0 cursor-pointer">
+                                    <span><i class="fas fa-flask mr-1 text-sky-400"></i>Demo mode</span>
+                                </label>
+                                <button id="exampleBtn" class="btn-ghost text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-gray-300" aria-label="Fill with a sample prompt">
+                                    <i class="fas fa-shuffle"></i> Random sample
+                                </button>
+                            </div>
+                            <button id="generateBtn" class="btn-primary text-white font-semibold py-2.5 px-7 rounded-xl flex items-center gap-2">
+                                <i class="fas fa-wand-magic-sparkles"></i> Generate
                             </button>
                         </div>
-                        <button id="generateBtn" class="btn-primary text-white font-semibold py-2.5 px-7 rounded-xl flex items-center gap-2">
-                            <i class="fas fa-wand-magic-sparkles"></i> Generate
-                        </button>
+                    </div>
+                    <div class="lg:w-56 flex flex-col justify-center border-t lg:border-t-0 lg:border-l border-white/10 pt-4 lg:pt-0 lg:pl-6">
+                        <div class="text-xs text-sky-300 mb-2 font-semibold uppercase tracking-wider flex items-center gap-1"><i class="fas fa-microchip"></i> AI understands</div>
+                        <ul class="text-xs text-gray-400 space-y-1.5">
+                            <li class="flex items-start gap-2"><i class="fas fa-check text-emerald-400 mt-0.5 text-[10px]"></i>Frontend & backend frameworks</li>
+                            <li class="flex items-start gap-2"><i class="fas fa-check text-emerald-400 mt-0.5 text-[10px]"></i>Databases & ORMs</li>
+                            <li class="flex items-start gap-2"><i class="fas fa-check text-emerald-400 mt-0.5 text-[10px]"></i>Auth, APIs, dashboards</li>
+                            <li class="flex items-start gap-2"><i class="fas fa-check text-emerald-400 mt-0.5 text-[10px]"></i>Fullstack, frontend, or backend</li>
+                        </ul>
+                        <div class="mt-3 text-[11px] text-slate-500 italic flex items-center gap-1"><i class="fas fa-download"></i> Download folder as ZIP after generation</div>
                     </div>
                 </div>
-                <div class="lg:w-56 flex flex-col justify-center border-t lg:border-t-0 lg:border-l border-white/10 pt-4 lg:pt-0 lg:pl-6">
-                    <div class="text-xs text-sky-300 mb-2 font-semibold uppercase tracking-wider flex items-center gap-1"><i class="fas fa-microchip"></i> AI understands</div>
-                    <ul class="text-xs text-gray-400 space-y-1.5">
-                        <li class="flex items-start gap-2"><i class="fas fa-check text-emerald-400 mt-0.5 text-[10px]"></i>Frontend & backend frameworks</li>
-                        <li class="flex items-start gap-2"><i class="fas fa-check text-emerald-400 mt-0.5 text-[10px]"></i>Databases & ORMs</li>
-                        <li class="flex items-start gap-2"><i class="fas fa-check text-emerald-400 mt-0.5 text-[10px]"></i>Auth, APIs, dashboards</li>
-                        <li class="flex items-start gap-2"><i class="fas fa-check text-emerald-400 mt-0.5 text-[10px]"></i>Fullstack, frontend, or backend</li>
-                    </ul>
-                    <div class="mt-3 text-[11px] text-slate-500 italic flex items-center gap-1"><i class="fas fa-download"></i> Download folder as ZIP after generation</div>
-                </div>
-            </div>
-        </section>
+            </section>
+        </div>
 
         <div id="resultsSection" class="mt-6 space-y-6 hidden"></div>
         <div id="emptyState" class="text-center py-20 glass-card rounded-2xl mt-6 border border-dashed border-white/10">
@@ -295,6 +300,28 @@
         const resultsSection    = document.getElementById('resultsSection');
         const emptyState        = document.getElementById('emptyState');
         const toastContainer    = document.getElementById('toastContainer');
+        const topProgressBar    = document.getElementById('topProgressBar');
+
+        function setPreloaderProgress(percent) {
+            if (!topProgressBar) return;
+            topProgressBar.style.width = percent + '%';
+            if (percent >= 100) {
+                setTimeout(() => {
+                    topProgressBar.style.opacity = '0';
+                    setTimeout(() => {
+                        topProgressBar.style.width = '0%';
+                        topProgressBar.style.opacity = '1';
+                    }, 300);
+                }, 400);
+            } else {
+                topProgressBar.style.opacity = '1';
+            }
+        }
+
+        // Trigger initial page load progress
+        setPreloaderProgress(30);
+        setTimeout(() => setPreloaderProgress(65), 180);
+        setTimeout(() => setPreloaderProgress(100), 380);
 
         function showToast(message, type) {
             type = type || 'info';
@@ -823,6 +850,11 @@
             }
             const useDemo = demoModeCheckbox.checked;
             loadingOverlay.classList.remove('hidden');
+            setPreloaderProgress(20);
+            const interval = setInterval(() => {
+                const currentWidth = parseInt(topProgressBar.style.width || "0");
+                setPreloaderProgress(Math.min(90, currentWidth + 8));
+            }, 100);
             try {
                 let resultData;
                 if (useDemo) {
@@ -831,6 +863,8 @@
                 } else {
                     resultData = await callLiveAPI(prompt);
                 }
+                clearInterval(interval);
+                setPreloaderProgress(100);
                 const structure = resultData.structure || {};
                 const parsed = resultData.parsed_prompt || { project_type: 'fullstack', frontend: 'React', backend: 'Node.js', database: 'MongoDB', features: [] };
                 currentStructure = structure;
@@ -841,15 +875,26 @@
                 resultsSection.appendChild(treeCard);
                 emptyState.classList.add('hidden');
                 resultsSection.classList.remove('hidden');
-                gsap.fromTo(parsedCard, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' });
-                gsap.fromTo(treeCard, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.45, delay: 0.08, ease: 'power2.out' });
+                
+                // Luxury 3D Tilt perspective slide up animations
+                gsap.fromTo(parsedCard, 
+                    { opacity: 0, y: 50, rotateX: 8, transformOrigin: "top center" }, 
+                    { opacity: 1, y: 0, rotateX: 0, duration: 0.7, ease: 'power3.out' }
+                );
+                gsap.fromTo(treeCard, 
+                    { opacity: 0, y: 50, rotateX: 8, transformOrigin: "top center" }, 
+                    { opacity: 1, y: 0, rotateX: 0, duration: 0.7, delay: 0.1, ease: 'power3.out' }
+                );
+                
                 const items = treeCard.querySelectorAll('.folder-item, .file-item');
                 if (items.length < 80) {
-                    gsap.fromTo(items, { opacity: 0, x: -6 }, { opacity: 1, x: 0, stagger: 0.015, duration: 0.25, delay: 0.15 });
+                    gsap.fromTo(items, { opacity: 0, x: -8 }, { opacity: 1, x: 0, stagger: 0.012, duration: 0.25, delay: 0.2 });
                 }
                 const stats = countStructure(structure);
                 showToast(`Structure generated — ${stats.files} files, ${stats.folders} folders`, 'success');
             } catch (err) {
+                clearInterval(interval);
+                setPreloaderProgress(100);
                 console.error(err);
                 resultsSection.innerHTML = '';
                 const errorDiv = document.createElement('div');

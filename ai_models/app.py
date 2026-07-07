@@ -39,7 +39,11 @@ def handle_exception(e):
 # Serve the frontend (index.html) at the root route
 @app.route('/')
 def index():
-    return send_from_directory(templates_dir, 'index.html')
+    response = send_from_directory(templates_dir, 'index.html')
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, public, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 # Generate folder structure from prompt
 @app.route("/generate", methods=["POST", "OPTIONS"])
@@ -110,7 +114,11 @@ def download_project():
 # Optional: serve any other static files (if needed)
 @app.route('/<path:filename>')
 def static_files(filename):
-    return send_from_directory(templates_dir, filename)
+    response = send_from_directory(templates_dir, filename)
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, public, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 if __name__ == "__main__":
     app.run(debug=True)
