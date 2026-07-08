@@ -59,7 +59,23 @@ class FileClassifier:
         return "source"
 
 if __name__ == "__main__":
-    classifier = FileClassifier()
+    import os
+    import pickle
+    
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    pkl_path = os.path.join(base_dir, 'models', 'file_classifier.pkl')
+    
+    if os.path.exists(pkl_path):
+        try:
+            with open(pkl_path, 'rb') as f:
+                classifier = pickle.load(f)
+            print("Loaded classifier from pickle file successfully.")
+        except Exception as e:
+            print(f"Error loading pickle: {e}. Falling back to default initialization.")
+            classifier = FileClassifier()
+    else:
+        classifier = FileClassifier()
+        
     test_items = ["package.json", "App.jsx", "src", "logo.png", "main.py", ".gitignore"]
     
     results = {item: classifier.classify(item) for item in test_items}
