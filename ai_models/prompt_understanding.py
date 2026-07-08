@@ -198,7 +198,8 @@ class PromptUnderstandingModel:
             "backend": entities["backend"],
             "database": entities["database"],
             "language": entities["language"],
-            "features": entities["features"]
+            "features": entities["features"],
+            "raw_prompt": prompt
         }
 
 if __name__ == "__main__":

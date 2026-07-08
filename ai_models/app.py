@@ -36,10 +36,18 @@ def handle_exception(e):
     app.logger.error("Unhandled Exception caught in global handler", exc_info=e)
     return jsonify({"error": str(e), "success": False}), 500
 
-# Serve the frontend (index.html) at the root route
 @app.route('/')
 def index():
     response = send_from_directory(templates_dir, 'index.html')
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, public, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
+# Serve the application generator page
+@app.route('/app')
+def app_page():
+    response = send_from_directory(templates_dir, 'app.html')
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, public, max-age=0"
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"

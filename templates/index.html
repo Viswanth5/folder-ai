@@ -2,959 +2,1966 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Folder AI | Intelligent Project Structure Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Folder AI — Generate Production-Ready Project Structures with AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        heading: ['Space Grotesk', 'sans-serif'],
+                        body: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#f0f4ff',
+                            100: '#dbe4ff',
+                            200: '#bac8ff',
+                            300: '#91a7ff',
+                            400: '#748ffc',
+                            500: '#5c7cfa',
+                            600: '#4c6ef5',
+                            700: '#4263eb',
+                            800: '#3b5bdb',
+                            900: '#364fc7',
+                        },
+                        dark: {
+                            50: '#C1C2C5',
+                            100: '#A6A7AB',
+                            200: '#909296',
+                            300: '#5C5F66',
+                            400: '#373A40',
+                            500: '#2C2E33',
+                            600: '#25262B',
+                            700: '#1A1B1E',
+                            800: '#141517',
+                            900: '#101113',
+                        }
+                    },
+                    borderRadius: {
+                        'xl': '24px',
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        :root {
-            --bg: #05070f;
-            --fg: #f8fafc;
-            --muted: #94a3b8;
-            --accent: #38bdf8;
-            --accent-dim: rgba(56,189,248,0.1);
-            --card: rgba(8, 10, 24, 0.65);
-            --border: rgba(255, 255, 255, 0.05);
-            --glow: rgba(56, 189, 248, 0.2);
-            --glow-purple: rgba(139, 92, 246, 0.2);
-            --card-hover-border: rgba(255, 255, 255, 0.12);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
-        h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; }
+        
         body {
-            background: var(--bg);
-            color: var(--fg);
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0f;
+            color: #ffffff;
             overflow-x: hidden;
-            min-height: 100vh;
         }
-        .bg-atmosphere {
-            position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Space Grotesk', sans-serif;
         }
-        .bg-blob {
-            position: absolute; border-radius: 50%; filter: blur(140px); opacity: 0.12;
-            animation: blobDrift 22s ease-in-out infinite alternate;
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
         }
-        .bg-blob--1 { width: 700px; height: 700px; background: #0ea5e9; top: -15%; left: -10%; animation-delay: 0s; }
-        .bg-blob--2 { width: 600px; height: 600px; background: #7c3aed; bottom: -10%; right: -10%; animation-delay: -6s; }
-        .bg-blob--3 { width: 450px; height: 450px; background: #ec4899; top: 35%; left: 50%; animation-delay: -12s; opacity: 0.04; }
-        @keyframes blobDrift {
-            0%   { transform: translate(0, 0) scale(1); }
-            33%  { transform: translate(40px, -50px) scale(1.08); }
-            66%  { transform: translate(-30px, 30px) scale(0.92); }
-            100% { transform: translate(15px, -15px) scale(1.04); }
+        
+        ::-webkit-scrollbar-track {
+            background: #0a0a0f;
         }
-        .bg-grid {
-            position: fixed; inset: 0; z-index: 0; pointer-events: none;
-            background-image: radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px);
-            background-size: 32px 32px;
+        
+        ::-webkit-scrollbar-thumb {
+            background: #25262b;
+            border-radius: 4px;
         }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(56,189,248,0.3); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-        .glass-card {
-            background: var(--card);
-            backdrop-filter: blur(24px);
-            border: 1px solid var(--border);
-            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.05);
-            transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #364fc7;
         }
-        .glass-card:hover {
-            border-color: var(--card-hover-border);
-            box-shadow: 0 15px 50px -5px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+        
+        /* Glass effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
-        .tree-node { transition: all 0.15s ease; }
-        .folder-item, .file-item {
-            transition: background 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            border-radius: 0.5rem;
-            cursor: pointer;
-            user-select: none;
+        
+        .glass-light {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
         }
-        .folder-item:hover, .file-item:hover {
-            background: rgba(255,255,255,0.05);
-            transform: translateX(4px);
+        
+        /* Background effects */
+        .bg-gradient-radial {
+            background: radial-gradient(ellipse at center, rgba(76, 110, 245, 0.15) 0%, rgba(10, 10, 15, 0) 70%);
         }
-        .folder-item:active, .file-item:active { transform: scale(0.98); }
-        .nested-list {
-            margin-left: 1.25rem;
-            padding-left: 0.75rem;
-            border-left: 1px dashed rgba(148,163,184,0.15);
-            transition: all 0.25s;
+        
+        .bg-gradient-aurora {
+            background: 
+                radial-gradient(ellipse at 20% 50%, rgba(76, 110, 245, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(130, 87, 229, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(59, 91, 219, 0.1) 0%, transparent 50%);
         }
-        .tree-icon { width: 1.25rem; text-align: center; margin-right: 0.5rem; flex-shrink: 0; }
+        
+        /* Grid perspective */
+        .grid-perspective {
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            transform: perspective(500px) rotateX(60deg);
+            transform-origin: center top;
+            opacity: 0.3;
+        }
+        
+        /* Noise texture */
+        .noise::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        /* Floating particles */
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(76, 110, 245, 0.5);
+            border-radius: 50%;
+            animation: float 10s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            50% {
+                transform: translateY(-100px) translateX(50px);
+            }
+        }
+        
+        /* Glow effect */
+        .glow {
+            box-shadow: 0 0 20px rgba(76, 110, 245, 0.3);
+        }
+        
+        .glow-border {
+            border: 1px solid rgba(76, 110, 245, 0.3);
+        }
+        
+        /* Button effects */
         .btn-primary {
-            background: linear-gradient(135deg, #0ea5e9 0%, #7c3aed 100%);
-            box-shadow: 0 4px 20px -2px var(--glow);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(135deg, #4c6ef5, #5c7cfa);
+            transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
         }
-        .btn-primary::after {
+        
+        .btn-primary::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 100%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
         }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
         .btn-primary:hover {
-            box-shadow: 0 6px 30px var(--glow), 0 0 15px var(--glow-purple);
             transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(76, 110, 245, 0.4);
         }
-        .btn-primary:hover::after {
-            opacity: 1;
-        }
-        .btn-primary:active {
-            transform: translateY(0) scale(0.97);
-        }
-        .btn-ghost {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--border);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .btn-ghost:hover {
-            background: rgba(255, 255, 255, 0.06);
-            border-color: rgba(255, 255, 255, 0.15);
-            transform: translateY(-1px);
-        }
-        .btn-ghost:active {
-            transform: translateY(0) scale(0.98);
-        }
-        .feature-tag {
-            background: var(--accent-dim);
-            border: 1px solid rgba(56,189,248,0.2);
-            transition: all 0.2s ease;
-        }
-        .feature-tag:hover {
-            border-color: rgba(56,189,248,0.5);
-            background: rgba(56,189,248,0.15);
-        }
-        .stat-pill {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid var(--border);
-            transition: all 0.2s ease;
-        }
-        .stat-pill:hover {
-            background: rgba(255,255,255,0.06);
-            border-color: rgba(255,255,255,0.1);
-        }
-        .toast-container {
-            position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
-            z-index: 9999; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
-            pointer-events: none;
-        }
-        .toast {
-            pointer-events: auto;
-            padding: 0.6rem 1.25rem; border-radius: 9999px;
-            font-size: 0.8rem; font-weight: 500;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-            animation: toastIn 0.35s cubic-bezier(0.2,0.9,0.4,1.1);
-        }
-        .toast--success { background: rgba(16,185,129,0.9); color: #fff; }
-        .toast--error { background: rgba(239,68,68,0.9); color: #fff; }
-        .toast--info { background: rgba(56,189,248,0.9); color: #0c1222; }
-        .toast--exit { animation: toastOut 0.3s ease forwards; }
-        @keyframes toastIn { from { opacity:0; transform:translateY(16px) scale(0.95); } to { opacity:1; transform:translateY(0) scale(1); } }
-        @keyframes toastOut { to { opacity:0; transform:translateY(10px) scale(0.95); } }
-        .loader {
-            border: 3px solid rgba(139, 92, 246, 0.15);
-            border-top-color: var(--accent);
-            border-radius: 50%;
-            width: 56px; height: 56px;
-            animation: spin 1s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-            box-shadow: 0 0 30px rgba(56, 189, 248, 0.2);
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .search-input {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid var(--border);
+        
+        .btn-secondary {
+            border: 1px solid rgba(255, 255, 255, 0.2);
             transition: all 0.3s ease;
         }
-        .search-input:focus {
-            background: rgba(255,255,255,0.05);
-            border-color: rgba(56,189,248,0.5);
-            box-shadow: 0 0 15px rgba(56,189,248,0.1);
+        
+        .btn-secondary:hover {
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-2px);
         }
-        textarea#promptInput {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid var(--border);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        
+        /* Card hover effects */
+        .card-hover {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        textarea#promptInput:focus {
-            background: rgba(255,255,255,0.04);
-            border-color: rgba(56,189,248,0.5);
-            box-shadow: 0 0 25px rgba(56, 189, 248, 0.15), inset 0 2px 4px rgba(0,0,0,0.15);
+        
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: rgba(76, 110, 245, 0.3);
         }
-        .pulse-dot {
-            width: 8px; height: 8px; border-radius: 50%; background: #10b981;
-            animation: pulse 2s ease-in-out infinite;
+        
+        /* Feature chips */
+        .feature-chip {
+            background: rgba(76, 110, 245, 0.1);
+            border: 1px solid rgba(76, 110, 245, 0.2);
+            transition: all 0.3s ease;
         }
-        @keyframes pulse { 0%,100%{ opacity:1; transform:scale(1); } 50%{ opacity:0.5; transform:scale(1.3); } }
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        
+        .feature-chip:hover {
+            background: rgba(76, 110, 245, 0.2);
+            border-color: rgba(76, 110, 245, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        /* Timeline connector */
+        .timeline-connector {
+            height: 2px;
+            background: linear-gradient(90deg, rgba(76, 110, 245, 0.5), rgba(76, 110, 245, 0.2));
+            position: relative;
+        }
+        
+        .timeline-connector::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: -3px;
+            width: 8px;
+            height: 8px;
+            border-right: 2px solid rgba(76, 110, 245, 0.5);
+            border-bottom: 2px solid rgba(76, 110, 245, 0.5);
+            transform: rotate(-45deg);
+        }
+        
+        /* Marquee */
+        .marquee-container {
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        
+        .marquee-content {
+            display: inline-block;
+            animation: marquee 30s linear infinite;
+        }
+        
+        @keyframes marquee {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+        
+        /* Accordion */
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .accordion-item.active .accordion-content {
+            max-height: 200px;
+        }
+        
+        .accordion-item.active .accordion-icon {
+            transform: rotate(45deg);
+        }
+        
+        .accordion-icon {
+            transition: transform 0.3s ease;
+        }
+        
+        /* Code editor */
+        .code-editor {
+            font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace;
+        }
+        
+        /* Animated counter */
+        .counter {
+            font-variant-numeric: tabular-nums;
+        }
+        
+        /* Technology icon hover */
+        .tech-icon {
+            transition: all 0.3s ease;
+        }
+        
+        .tech-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(76, 110, 245, 0.4);
+            border-color: rgba(76, 110, 245, 0.5);
+        }
+        
+        /* Flow chart animations */
+        .flow-connector {
+            stroke-dasharray: 8 4;
+            animation: dash 1.5s linear infinite;
+        }
+        
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -24;
+            }
+        }
+        
+        /* Node pulse */
+        .node-pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(76, 110, 245, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(76, 110, 245, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(76, 110, 245, 0);
+            }
+        }
+        
+        /* Folder animation */
+        .folder-tree-item {
+            animation: fadeInLeft 0.5s ease forwards;
+            opacity: 0;
+        }
+        
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* Comparison table */
+        .comparison-highlight {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .comparison-highlight::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(76, 110, 245, 0.1), rgba(76, 110, 245, 0.05));
+            z-index: 0;
+        }
+        
+        /* Header scroll effect */
+        .header-scrolled {
+            padding-top: 0.75rem !important;
+            padding-bottom: 0.75rem !important;
+            background: rgba(10, 10, 15, 0.8) !important;
+        }
+        
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Mouse follow light */
+        .mouse-light {
+            position: fixed;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(76, 110, 245, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.3s ease;
+        }
+
+        /* Infinite Scroll Keyframes & Classes */
+        @keyframes scroll-left {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        @keyframes scroll-right {
+            0% { transform: translateX(-50%); }
+            100% { transform: translateX(0); }
+        }
+        .animate-scroll-left {
+            animation: scroll-left 45s linear infinite;
+        }
+        .animate-scroll-right {
+            animation: scroll-right 45s linear infinite;
+        }
+        .scroll-track:hover .animate-scroll-left,
+        .scroll-track:hover .animate-scroll-right {
+            animation-play-state: paused;
         }
     </style>
 </head>
-<body>
-    <!-- Glowing Preloader Progress Bar -->
-    <div id="topProgressBar" class="fixed top-0 left-0 h-[3px] bg-gradient-to-r from-sky-400 via-indigo-500 to-pink-500 z-50 transition-all duration-300 ease-out" style="width: 0%; box-shadow: 0 0 10px rgba(56, 189, 248, 0.8);"></div>
+<body class="noise">
+    <!-- Mouse follow light -->
+    <div class="mouse-light" id="mouseLight"></div>
 
-    <div class="bg-atmosphere" aria-hidden="true">
-        <div class="bg-blob bg-blob--1"></div>
-        <div class="bg-blob bg-blob--2"></div>
-        <div class="bg-blob bg-blob--3"></div>
+    <!-- Background effects -->
+    <div class="fixed inset-0 z-0">
+        <div class="absolute inset-0 bg-gradient-aurora"></div>
+        <div class="absolute inset-0 bg-gradient-radial"></div>
+        <div class="absolute bottom-0 left-0 right-0 h-[500px] grid-perspective"></div>
+        
+        <!-- Floating particles -->
+        <div class="particle" style="top: 20%; left: 10%; animation-delay: 0s;"></div>
+        <div class="particle" style="top: 40%; left: 30%; animation-delay: 2s;"></div>
+        <div class="particle" style="top: 60%; left: 70%; animation-delay: 4s;"></div>
+        <div class="particle" style="top: 80%; left: 90%; animation-delay: 6s;"></div>
+        <div class="particle" style="top: 30%; left: 50%; animation-delay: 8s;"></div>
+        <div class="particle" style="top: 70%; left: 20%; animation-delay: 10s;"></div>
+        <div class="particle" style="top: 50%; left: 80%; animation-delay: 12s;"></div>
+        <div class="particle" style="top: 10%; left: 60%; animation-delay: 14s;"></div>
     </div>
-    <div class="bg-grid" aria-hidden="true"></div>
 
-    <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+    <!-- Header -->
+    <header id="header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" style="padding: 1.5rem 0;">
+        <div class="max-w-[1400px] mx-auto px-6">
+            <nav class="glass rounded-2xl px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center">
+                    <a href="#" class="flex items-center space-x-2">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-600 to-primary-400 flex items-center justify-center">
+                            <i data-lucide="folder-tree" class="w-5 h-5 text-white"></i>
+                        </div>
+                        <span class="font-heading font-semibold text-lg">Folder AI</span>
+                    </a>
+                </div>
+                
+                <div class="hidden lg:flex items-center space-x-8">
+                    <a href="#features" class="text-sm text-gray-300 hover:text-white transition-colors">Features</a>
+                    <a href="#how-it-works" class="text-sm text-gray-300 hover:text-white transition-colors">How It Works</a>
+                    <a href="#technology" class="text-sm text-gray-300 hover:text-white transition-colors">Technology</a>
+                    <a href="/app" class="text-sm text-gray-300 hover:text-white transition-colors">Try Generator</a>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-4">
+                    <a href="/app" class="btn-primary text-sm font-medium px-5 py-2.5 rounded-xl text-white">Generate Project</a>
+                </div>
+                
+                <button id="mobileMenuBtn" class="lg:hidden text-gray-300 hover:text-white">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
 
-    <div id="loadingOverlay" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
-        <div class="glass-card rounded-2xl p-8 flex flex-col items-center gap-4 max-w-sm mx-4">
-            <div class="loader"></div>
-            <p class="text-white font-semibold">Analyzing your project...</p>
-            <p class="text-xs text-gray-400">Parsing intent and generating hierarchy</p>
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="fixed inset-0 z-40 hidden">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+        <div class="absolute right-0 top-0 bottom-0 w-72 bg-dark-800 p-6 flex flex-col">
+            <button id="closeMobileMenu" class="self-end text-gray-300 hover:text-white mb-8">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+            <div class="flex flex-col space-y-6">
+                <a href="#features" class="text-gray-300 hover:text-white transition-colors">Features</a>
+                <a href="#how-it-works" class="text-gray-300 hover:text-white transition-colors">How It Works</a>
+                <a href="#technology" class="text-gray-300 hover:text-white transition-colors">Technology</a>
+                <a href="/app" class="btn-primary text-sm font-medium px-5 py-2.5 rounded-xl text-white text-center">Generate Project</a>
+            </div>
         </div>
     </div>
 
-    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-14">
-        <header class="text-center mb-10 md:mb-14">
-            <div class="inline-flex items-center gap-2.5 bg-white/5 backdrop-blur-sm px-4 py-1.5 rounded-full border border-white/10 mb-5">
-                <div class="pulse-dot"></div>
-                <span class="text-xs font-semibold tracking-widest uppercase text-sky-300">AI-Powered Architecture</span>
-            </div>
-            <h1 id="heroTitle" class="text-5xl md:text-7xl font-extrabold mb-4 leading-none">
-                <span class="bg-gradient-to-r from-sky-300 via-blue-200 to-violet-300 bg-clip-text text-transparent">Folder</span>
-                <span class="bg-gradient-to-r from-violet-300 to-pink-300 bg-clip-text text-transparent"> AI v2</span>
-            </h1>
-            <p class="text-gray-400 text-lg max-w-xl mx-auto leading-relaxed">
-                Describe your project in natural language and get a production-ready folder structure, tech stack breakdown, and file hierarchy — instantly.
-            </p>
-        </header>
-
-        <!-- Ultra-Luxury Workspace Prompt Wrapper -->
-        <div class="relative group p-[1px] rounded-2xl bg-gradient-to-r from-white/10 via-white/5 to-white/10 focus-within:from-sky-500 focus-within:via-indigo-500 focus-within:to-purple-500 transition-all duration-500 shadow-2xl mb-8">
-            <section class="glass-card rounded-[15px] p-5 md:p-7" aria-label="Project prompt input" style="border: none; box-shadow: none;">
-                <div class="flex flex-col lg:flex-row gap-6">
-                    <div class="flex-1">
-                        <label for="promptInput" class="block text-sm font-semibold text-sky-200 mb-2 flex items-center gap-2">
-                            <i class="fas fa-comment-dots"></i> Project prompt
-                        </label>
-                        <textarea id="promptInput" rows="4"
-                            class="w-full bg-white/5 border border-white/5 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none transition resize-none text-sm leading-relaxed"
-                            placeholder="e.g., &quot;Create a MERN stack e-commerce platform with authentication, dashboard, and payment integration&quot;"
-                            aria-describedby="promptHint">Create a MERN stack project with authentication and dashboard</textarea>
-                        <div id="promptHint" class="sr-only">Describe the project you want to generate a folder structure for</div>
-                        <div class="flex flex-wrap items-center justify-between gap-3 mt-4">
-                            <div class="flex items-center gap-3">
-                                <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-300 hover:text-gray-100 transition">
-                                    <input type="checkbox" id="demoModeCheckbox" class="w-4 h-4 rounded border-gray-600 bg-white/5 text-sky-500 focus:ring-sky-500 focus:ring-offset-0 cursor-pointer">
-                                    <span><i class="fas fa-flask mr-1 text-sky-400"></i>Demo mode</span>
-                                </label>
-                                <button id="exampleBtn" class="btn-ghost text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-gray-300" aria-label="Fill with a sample prompt">
-                                    <i class="fas fa-shuffle"></i> Random sample
-                                </button>
-                            </div>
-                            <button id="generateBtn" class="btn-primary text-white font-semibold py-2.5 px-7 rounded-xl flex items-center gap-2">
-                                <i class="fas fa-wand-magic-sparkles"></i> Generate
-                            </button>
-                        </div>
+    <!-- Hero Section -->
+    <section class="relative z-10 pt-40 pb-20 px-6">
+        <div class="max-w-[1400px] mx-auto">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div>
+                    <div class="flex flex-wrap gap-3 mb-8">
+                        <span class="feature-chip text-xs font-medium px-3 py-1.5 rounded-full text-primary-300">AI Powered</span>
+                        <span class="feature-chip text-xs font-medium px-3 py-1.5 rounded-full text-primary-300">50+ Frameworks</span>
+                        <span class="feature-chip text-xs font-medium px-3 py-1.5 rounded-full text-primary-300">Instant Download</span>
+                        <span class="feature-chip text-xs font-medium px-3 py-1.5 rounded-full text-primary-300">Production Ready</span>
                     </div>
-                    <div class="lg:w-56 flex flex-col justify-center border-t lg:border-t-0 lg:border-l border-white/10 pt-4 lg:pt-0 lg:pl-6">
-                        <div class="text-xs text-sky-300 mb-2 font-semibold uppercase tracking-wider flex items-center gap-1"><i class="fas fa-microchip"></i> AI understands</div>
-                        <ul class="text-xs text-gray-400 space-y-1.5">
-                            <li class="flex items-start gap-2"><i class="fas fa-check text-emerald-400 mt-0.5 text-[10px]"></i>Frontend & backend frameworks</li>
-                            <li class="flex items-start gap-2"><i class="fas fa-check text-emerald-400 mt-0.5 text-[10px]"></i>Databases & ORMs</li>
-                            <li class="flex items-start gap-2"><i class="fas fa-check text-emerald-400 mt-0.5 text-[10px]"></i>Auth, APIs, dashboards</li>
-                            <li class="flex items-start gap-2"><i class="fas fa-check text-emerald-400 mt-0.5 text-[10px]"></i>Fullstack, frontend, or backend</li>
-                        </ul>
-                        <div class="mt-3 text-[11px] text-slate-500 italic flex items-center gap-1"><i class="fas fa-download"></i> Download folder as ZIP after generation</div>
+                    
+                    <h1 class="font-heading text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.1] mb-6">
+                        Generate Production-Ready Project Structures with AI
+                    </h1>
+                    
+                    <p class="text-lg text-gray-400 mb-10 max-w-lg">
+                        Transform simple prompts into complete project architectures with frameworks, folders, files, documentation, and scalable engineering practices.
+                    </p>
+                    
+                    <div class="flex flex-wrap gap-4">
+                        <a href="/app" class="btn-primary px-8 py-4 rounded-xl text-white font-medium text-lg flex items-center gap-2">
+                            Generate Structure
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </a>
+                        <a href="#how-it-works" class="btn-secondary px-8 py-4 rounded-xl text-white font-medium text-lg flex items-center gap-2">
+                            How It Works
+                            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                        </a>
                     </div>
                 </div>
-            </section>
+                
+                <div class="relative">
+                    <div class="glass-light rounded-3xl p-6 relative overflow-hidden">
+                        <!-- Animated folder hierarchy visualization -->
+                        <div class="relative z-10">
+                            <div class="flex items-center gap-2 mb-4">
+                                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                                <div class="flex-1 bg-dark-600 rounded-full h-6 mx-2 flex items-center px-3">
+                                    <span class="text-xs text-gray-400 font-mono">folder-ai-project</span>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-1 font-mono text-sm">
+                                <div class="folder-tree-item flex items-center gap-2 text-primary-400" style="animation-delay: 0.1s;">
+                                    <i data-lucide="folder" class="w-4 h-4"></i>
+                                    <span>src</span>
+                                </div>
+                                <div class="folder-tree-item flex items-center gap-2 text-gray-300 pl-6" style="animation-delay: 0.2s;">
+                                    <i data-lucide="folder" class="w-4 h-4"></i>
+                                    <span>components</span>
+                                </div>
+                                <div class="folder-tree-item flex items-center gap-2 text-gray-400 pl-12" style="animation-delay: 0.3s;">
+                                    <i data-lucide="file-code" class="w-4 h-4"></i>
+                                    <span>Header.tsx</span>
+                                </div>
+                                <div class="folder-tree-item flex items-center gap-2 text-gray-400 pl-12" style="animation-delay: 0.35s;">
+                                    <i data-lucide="file-code" class="w-4 h-4"></i>
+                                    <span>Footer.tsx</span>
+                                </div>
+                                <div class="folder-tree-item flex items-center gap-2 text-gray-300 pl-6" style="animation-delay: 0.4s;">
+                                    <i data-lucide="folder" class="w-4 h-4"></i>
+                                    <span>pages</span>
+                                </div>
+                                <div class="folder-tree-item flex items-center gap-2 text-gray-400 pl-12" style="animation-delay: 0.5s;">
+                                    <i data-lucide="file-code" class="w-4 h-4"></i>
+                                    <span>index.tsx</span>
+                                </div>
+                                <div class="folder-tree-item flex items-center gap-2 text-gray-400 pl-12" style="animation-delay: 0.55s;">
+                                    <i data-lucide="file-code" class="w-4 h-4"></i>
+                                    <span>about.tsx</span>
+                                </div>
+                                <div class="folder-tree-item flex items-center gap-2 text-gray-300 pl-6" style="animation-delay: 0.6s;">
+                                    <i data-lucide="folder" class="w-4 h-4"></i>
+                                    <span>utils</span>
+                                </div>
+                                <div class="folder-tree-item flex items-center gap-2 text-gray-400 pl-12" style="animation-delay: 0.7s;">
+                                    <i data-lucide="file" class="w-4 h-4"></i>
+                                    <span>helpers.ts</span>
+                                </div>
+                                <div class="folder-tree-item flex items-center gap-2 text-primary-400 mt-2" style="animation-delay: 0.8s;">
+                                    <i data-lucide="folder" class="w-4 h-4"></i>
+                                    <span>public</span>
+                                </div>
+                                <div class="folder-tree-item flex items-center gap-2 text-gray-400 pl-6" style="animation-delay: 0.9s;">
+                                    <i data-lucide="file" class="w-4 h-4"></i>
+                                    <span>index.html</span>
+                                </div>
+                                <div class="folder-tree-item flex items-center gap-2 text-primary-400 mt-2" style="animation-delay: 1s;">
+                                    <i data-lucide="file" class="w-4 h-4"></i>
+                                    <span>package.json</span>
+                                </div>
+                                <div class="folder-tree-item flex items-center gap-2 text-primary-400" style="animation-delay: 1.05s;">
+                                    <i data-lucide="file" class="w-4 h-4"></i>
+                                    <span>README.md</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- AI processing animation -->
+                        <div class="absolute top-4 right-4">
+                            <div class="w-16 h-16 rounded-full bg-primary-600/20 flex items-center justify-center node-pulse">
+                                <i data-lucide="sparkles" class="w-8 h-8 text-primary-400"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- Floating file cards -->
+                        <div class="absolute -bottom-4 -left-4 glass rounded-xl p-3 shadow-xl" style="animation: float 6s ease-in-out infinite; animation-delay: 1s;">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="file-code" class="w-5 h-5 text-green-400"></i>
+                                <span class="text-xs text-gray-300">app.py</span>
+                            </div>
+                        </div>
+                        
+                        <div class="absolute -top-4 -right-4 glass rounded-xl p-3 shadow-xl" style="animation: float 7s ease-in-out infinite; animation-delay: 2s;">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="file-json" class="w-5 h-5 text-yellow-400"></i>
+                                <span class="text-xs text-gray-300">config.json</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Live AI Input Section -->
+    <section id="features" class="relative z-10 py-20 px-6">
+        <div class="max-w-[1400px] mx-auto">
+            <div class="text-center mb-16">
+                <span class="feature-chip text-xs font-medium px-3 py-1.5 rounded-full text-primary-300 inline-block mb-4">Features</span>
+                <h2 class="font-heading text-4xl md:text-5xl font-bold mb-6">Everything You Need to Build Projects</h2>
+                <p class="text-gray-400 text-lg max-w-2xl mx-auto">
+                    Folder AI provides a comprehensive suite of tools to generate, customize, and deploy production-ready project structures.
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Feature Card 1 -->
+                <div class="glass rounded-2xl p-6 card-hover">
+                    <div class="w-12 h-12 rounded-xl bg-primary-600/20 flex items-center justify-center mb-4">
+                        <i data-lucide="message-square" class="w-6 h-6 text-primary-400"></i>
+                    </div>
+                    <h3 class="font-heading text-xl font-semibold mb-2">Natural Language Understanding</h3>
+                    <p class="text-gray-400">Describe your project in plain English and our AI understands your requirements perfectly.</p>
+                </div>
+                
+                <!-- Feature Card 2 -->
+                <div class="glass rounded-2xl p-6 card-hover">
+                    <div class="w-12 h-12 rounded-xl bg-primary-600/20 flex items-center justify-center mb-4">
+                        <i data-lucide="scan" class="w-6 h-6 text-primary-400"></i>
+                    </div>
+                    <h3 class="font-heading text-xl font-semibold mb-2">Framework Detection</h3>
+                    <p class="text-gray-400">Automatically detects the best frameworks based on your project requirements.</p>
+                </div>
+                
+                <!-- Feature Card 3 -->
+                <div class="glass rounded-2xl p-6 card-hover">
+                    <div class="w-12 h-12 rounded-xl bg-primary-600/20 flex items-center justify-center mb-4">
+                        <i data-lucide="folder-plus" class="w-6 h-6 text-primary-400"></i>
+                    </div>
+                    <h3 class="font-heading text-xl font-semibold mb-2">Automatic Folder Generation</h3>
+                    <p class="text-gray-400">Creates optimized folder structures following industry best practices.</p>
+                </div>
+                
+                <!-- Feature Card 4 -->
+                <div class="glass rounded-2xl p-6 card-hover">
+                    <div class="w-12 h-12 rounded-xl bg-primary-600/20 flex items-center justify-center mb-4">
+                        <i data-lucide="layout-template" class="w-6 h-6 text-primary-400"></i>
+                    </div>
+                    <h3 class="font-heading text-xl font-semibold mb-2">Production Templates</h3>
+                    <p class="text-gray-400">Access a library of battle-tested templates for various project types.</p>
+                </div>
+                
+                <!-- Feature Card 5 -->
+                <div class="glass rounded-2xl p-6 card-hover">
+                    <div class="w-12 h-12 rounded-xl bg-primary-600/20 flex items-center justify-center mb-4">
+                        <i data-lucide="sparkles" class="w-6 h-6 text-primary-400"></i>
+                    </div>
+                    <h3 class="font-heading text-xl font-semibold mb-2">AI Recommendations</h3>
+                    <p class="text-gray-400">Get intelligent suggestions for architecture patterns and best practices.</p>
+                </div>
+                
+                <!-- Feature Card 6 -->
+                <div class="glass rounded-2xl p-6 card-hover">
+                    <div class="w-12 h-12 rounded-xl bg-primary-600/20 flex items-center justify-center mb-4">
+                        <i data-lucide="download" class="w-6 h-6 text-primary-400"></i>
+                    </div>
+                    <h3 class="font-heading text-xl font-semibold mb-2">Download ZIP</h3>
+                    <p class="text-gray-400">Instantly download your complete project structure as a ready-to-use ZIP file.</p>
+                </div>
+                
+                <!-- Feature Card 7 -->
+                <div class="glass rounded-2xl p-6 card-hover">
+                    <div class="w-12 h-12 rounded-xl bg-primary-600/20 flex items-center justify-center mb-4">
+                        <i data-lucide="cpu" class="w-6 h-6 text-primary-400"></i>
+                    </div>
+                    <h3 class="font-heading text-xl font-semibold mb-2">Technology Detection</h3>
+                    <p class="text-gray-400">Automatically identifies required technologies and configures your project.</p>
+                </div>
+                
+                <!-- Feature Card 8 -->
+                <div class="glass rounded-2xl p-6 card-hover">
+                    <div class="w-12 h-12 rounded-xl bg-primary-600/20 flex items-center justify-center mb-4">
+                        <i data-lucide="boxes" class="w-6 h-6 text-primary-400"></i>
+                    </div>
+                    <h3 class="font-heading text-xl font-semibold mb-2">Project Scaffolding</h3>
+                    <p class="text-gray-400">Generates boilerplate code, configurations, and initial setup files.</p>
+                </div>
+                
+                <!-- Feature Card 9 -->
+                <div class="glass rounded-2xl p-6 card-hover">
+                    <div class="w-12 h-12 rounded-xl bg-primary-600/20 flex items-center justify-center mb-4">
+                        <i data-lucide="file-text" class="w-6 h-6 text-primary-400"></i>
+                    </div>
+                    <h3 class="font-heading text-xl font-semibold mb-2">Documentation Generator</h3>
+                    <p class="text-gray-400">Creates comprehensive documentation including README, API docs, and more.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="relative z-10 py-20 px-6">
+        <div class="max-w-[1400px] mx-auto">
+            <div class="text-center mb-16">
+                <span class="feature-chip text-xs font-medium px-3 py-1.5 rounded-full text-primary-300 inline-block mb-4">How It Works</span>
+                <h2 class="font-heading text-4xl md:text-5xl font-bold mb-6">From Idea to Project in Seconds</h2>
+                <p class="text-gray-400 text-lg max-w-2xl mx-auto">
+                    Our streamlined process transforms your natural language description into a complete project structure.
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-4 gap-6">
+                <div class="glass rounded-2xl p-6 text-center card-hover relative">
+                    <div class="text-5xl font-heading font-bold text-primary-600/30 mb-4">01</div>
+                    <h3 class="font-heading text-xl font-semibold mb-2">Describe Your Project</h3>
+                    <p class="text-gray-400 text-sm">Explain what you want to build in plain English.</p>
+                    
+                    <div class="hidden md:block absolute top-1/2 -right-3 transform -translate-y-1/2 z-10">
+                        <i data-lucide="chevron-right" class="w-6 h-6 text-primary-400"></i>
+                    </div>
+                </div>
+                
+                <div class="glass rounded-2xl p-6 text-center card-hover relative">
+                    <div class="text-5xl font-heading font-bold text-primary-600/30 mb-4">02</div>
+                    <h3 class="font-heading text-xl font-semibold mb-2">AI Understands Requirements</h3>
+                    <p class="text-gray-400 text-sm">Our AI analyzes your description and identifies key components.</p>
+                    
+                    <div class="hidden md:block absolute top-1/2 -right-3 transform -translate-y-1/2 z-10">
+                        <i data-lucide="chevron-right" class="w-6 h-6 text-primary-400"></i>
+                    </div>
+                </div>
+                
+                <div class="glass rounded-2xl p-6 text-center card-hover relative">
+                    <div class="text-5xl font-heading font-bold text-primary-600/30 mb-4">03</div>
+                    <h3 class="font-heading text-xl font-semibold mb-2">Architecture Generated</h3>
+                    <p class="text-gray-400 text-sm">A complete folder structure is created with all necessary files.</p>
+                    
+                    <div class="hidden md:block absolute top-1/2 -right-3 transform -translate-y-1/2 z-10">
+                        <i data-lucide="chevron-right" class="w-6 h-6 text-primary-400"></i>
+                    </div>
+                </div>
+                
+                <div class="glass rounded-2xl p-6 text-center card-hover">
+                    <div class="text-5xl font-heading font-bold text-primary-600/30 mb-4">04</div>
+                    <h3 class="font-heading text-xl font-semibold mb-2">Download Ready-to-Use Project</h3>
+                    <p class="text-gray-400 text-sm">Get your complete project as a ZIP file, ready for development.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Supported Technologies Section -->
+    <section id="technology" class="relative z-10 py-24 px-6 overflow-hidden bg-dark-900/10">
+        <div class="max-w-[1400px] mx-auto relative z-20">
+            <div class="text-center mb-16">
+                <span class="feature-chip text-xs font-medium px-3 py-1.5 rounded-full text-primary-300 inline-block mb-4">Technology</span>
+                <h2 class="font-heading text-4xl md:text-5xl font-bold mb-6">Supports 50+ Frameworks & Technologies</h2>
+                <p class="text-gray-400 text-lg max-w-2xl mx-auto">
+                    Folder AI works with all major frameworks, databases, and development tools.
+                </p>
+            </div>
         </div>
 
-        <div id="resultsSection" class="mt-6 space-y-6 hidden"></div>
-        <div id="emptyState" class="text-center py-20 glass-card rounded-2xl mt-6 border border-dashed border-white/10">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/5 mb-4">
-                <i class="fas fa-folder-tree text-3xl text-sky-400/50"></i>
+        <!-- Scrolling Ticker Container -->
+        <div class="relative w-full overflow-hidden select-none scroll-track py-4 flex flex-col gap-6">
+            <!-- Fade masks -->
+            <div class="absolute inset-y-0 left-0 w-16 md:w-36 bg-gradient-to-r from-[#0a0a0f] to-transparent pointer-events-none z-10"></div>
+            <div class="absolute inset-y-0 right-0 w-16 md:w-36 bg-gradient-to-l from-[#0a0a0f] to-transparent pointer-events-none z-10"></div>
+
+            <!-- Row 1: Left direction -->
+            <div class="flex whitespace-nowrap overflow-hidden">
+                <div class="flex gap-4 animate-scroll-left">
+                    <!-- React -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-react-original colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">React</span>
+                    </div>
+                    <!-- Vue -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-vuejs-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Vue</span>
+                    </div>
+                    <!-- Angular -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-angularjs-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Angular</span>
+                    </div>
+                    <!-- Next.js -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-nextjs-plain text-xl text-white"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Next.js</span>
+                    </div>
+                    <!-- Node -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-nodejs-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Node</span>
+                    </div>
+                    <!-- Express -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-express-original text-xl text-white"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Express</span>
+                    </div>
+                    <!-- Python -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-python-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Python</span>
+                    </div>
+                    <!-- Flask -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-flask-original text-xl text-white"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Flask</span>
+                    </div>
+                    <!-- FastAPI -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-fastapi-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">FastAPI</span>
+                    </div>
+                    <!-- Java -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-java-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Java</span>
+                    </div>
+                    <!-- Spring -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-spring-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Spring</span>
+                    </div>
+                    <!-- C# -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-csharp-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">C#</span>
+                    </div>
+                    <!-- .NET -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-dotnet-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">.NET</span>
+                    </div>
+                    <!-- PHP -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-php-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">PHP</span>
+                    </div>
+                    <!-- Laravel -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-laravel-original colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Laravel</span>
+                    </div>
+                </div>
+
+                <!-- Repeated Set for Seamless Infinite Loop -->
+                <div class="flex gap-4 animate-scroll-left" aria-hidden="true">
+                    <!-- React -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-react-original colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">React</span>
+                    </div>
+                    <!-- Vue -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-vuejs-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Vue</span>
+                    </div>
+                    <!-- Angular -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-angularjs-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Angular</span>
+                    </div>
+                    <!-- Next.js -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-nextjs-plain text-xl text-white"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Next.js</span>
+                    </div>
+                    <!-- Node -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-nodejs-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Node</span>
+                    </div>
+                    <!-- Express -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-express-original text-xl text-white"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Express</span>
+                    </div>
+                    <!-- Python -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-python-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Python</span>
+                    </div>
+                    <!-- Flask -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-flask-original text-xl text-white"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Flask</span>
+                    </div>
+                    <!-- FastAPI -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-fastapi-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">FastAPI</span>
+                    </div>
+                    <!-- Java -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-java-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Java</span>
+                    </div>
+                    <!-- Spring -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-spring-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Spring</span>
+                    </div>
+                    <!-- C# -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-csharp-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">C#</span>
+                    </div>
+                    <!-- .NET -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-dotnet-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">.NET</span>
+                    </div>
+                    <!-- PHP -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-php-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">PHP</span>
+                    </div>
+                    <!-- Laravel -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-laravel-original colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Laravel</span>
+                    </div>
+                </div>
             </div>
-            <h3 class="text-lg font-semibold text-white/70">No structure generated yet</h3>
-            <p class="text-gray-500 max-w-sm mx-auto mt-2 text-sm">Enter a project description and click Generate to see an AI-crafted folder hierarchy.</p>
-            <p class="text-gray-600 text-xs mt-4"><kbd class="bg-white/5 px-1.5 py-0.5 rounded text-[11px] border border-white/10">Ctrl</kbd> + <kbd class="bg-white/5 px-1.5 py-0.5 rounded text-[11px] border border-white/10">Enter</kbd> to generate</p>
+
+            <!-- Row 2: Right direction -->
+            <div class="flex whitespace-nowrap overflow-hidden">
+                <div class="flex gap-4 animate-scroll-right">
+                    <!-- Django -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-django-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Django</span>
+                    </div>
+                    <!-- MongoDB -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-mongodb-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">MongoDB</span>
+                    </div>
+                    <!-- PostgreSQL -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-postgresql-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">PostgreSQL</span>
+                    </div>
+                    <!-- MySQL -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-mysql-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">MySQL</span>
+                    </div>
+                    <!-- Docker -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-docker-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Docker</span>
+                    </div>
+                    <!-- K8s -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-kubernetes-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">K8s</span>
+                    </div>
+                    <!-- Redis -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-redis-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Redis</span>
+                    </div>
+                    <!-- Tailwind -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-tailwindcss-original colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Tailwind</span>
+                    </div>
+                    <!-- Bootstrap -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-bootstrap-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Bootstrap</span>
+                    </div>
+                    <!-- Flutter -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-flutter-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Flutter</span>
+                    </div>
+                    <!-- RN -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-react-original colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">RN</span>
+                    </div>
+                    <!-- Electron -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-electron-original colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Electron</span>
+                    </div>
+                </div>
+
+                <!-- Repeated Set for Seamless Infinite Loop -->
+                <div class="flex gap-4 animate-scroll-right" aria-hidden="true">
+                    <!-- Django -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-django-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Django</span>
+                    </div>
+                    <!-- MongoDB -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-mongodb-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">MongoDB</span>
+                    </div>
+                    <!-- PostgreSQL -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-postgresql-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">PostgreSQL</span>
+                    </div>
+                    <!-- MySQL -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-mysql-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">MySQL</span>
+                    </div>
+                    <!-- Docker -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-docker-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Docker</span>
+                    </div>
+                    <!-- K8s -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-kubernetes-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">K8s</span>
+                    </div>
+                    <!-- Redis -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-redis-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Redis</span>
+                    </div>
+                    <!-- Tailwind -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-tailwindcss-original colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Tailwind</span>
+                    </div>
+                    <!-- Bootstrap -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-bootstrap-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Bootstrap</span>
+                    </div>
+                    <!-- Flutter -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-flutter-plain colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Flutter</span>
+                    </div>
+                    <!-- RN -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-react-original colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">RN</span>
+                    </div>
+                    <!-- Electron -->
+                    <div class="glass hover:border-primary-500/30 hover:shadow-[0_0_20px_rgba(76,110,245,0.15)] hover:-translate-y-1 rounded-xl p-4 flex items-center gap-3 transition-all duration-300 cursor-pointer min-w-[150px] justify-center">
+                        <i class="devicon-electron-original colored text-xl"></i>
+                        <span class="text-gray-300 font-semibold text-sm">Electron</span>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
+
+    <!-- AI Engine Section -->
+    <section class="relative z-10 py-20 px-6">
+        <div class="max-w-[1400px] mx-auto">
+            <div class="text-center mb-16">
+                <span class="feature-chip text-xs font-medium px-3 py-1.5 rounded-full text-primary-300 inline-block mb-4">AI Engine</span>
+                <h2 class="font-heading text-4xl md:text-5xl font-bold mb-6">Powered by Advanced AI</h2>
+                <p class="text-gray-400 text-lg max-w-2xl mx-auto">
+                    Our sophisticated AI pipeline transforms your natural language input into a complete project structure.
+                </p>
+            </div>
+            
+            <div class="glass-light rounded-3xl p-8 md:p-12">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="glass rounded-xl p-4 text-center node-pulse">
+                        <div class="w-12 h-12 rounded-lg bg-primary-600/20 flex items-center justify-center mx-auto mb-2">
+                            <i data-lucide="message-square" class="w-6 h-6 text-primary-400"></i>
+                        </div>
+                        <span class="text-sm text-gray-300">Prompt</span>
+                    </div>
+                    
+                    <div class="hidden md:block w-16 h-0.5 bg-gradient-to-r from-primary-600/50 to-primary-400/50 relative">
+                        <div class="absolute top-1/2 left-0 w-2 h-2 rounded-full bg-primary-400" style="animation: pulse 2s infinite;"></div>
+                        <div class="absolute top-1/2 left-1/3 w-2 h-2 rounded-full bg-primary-400" style="animation: pulse 2s infinite; animation-delay: 0.3s;"></div>
+                        <div class="absolute top-1/2 left-2/3 w-2 h-2 rounded-full bg-primary-400" style="animation: pulse 2s infinite; animation-delay: 0.6s;"></div>
+                    </div>
+                    
+                    <div class="glass rounded-xl p-4 text-center">
+                        <div class="w-12 h-12 rounded-lg bg-primary-600/20 flex items-center justify-center mx-auto mb-2">
+                            <i data-lucide="brain" class="w-6 h-6 text-primary-400"></i>
+                        </div>
+                        <span class="text-sm text-gray-300">NLP</span>
+                    </div>
+                    
+                    <div class="hidden md:block w-16 h-0.5 bg-gradient-to-r from-primary-600/50 to-primary-400/50 relative">
+                        <div class="absolute top-1/2 left-0 w-2 h-2 rounded-full bg-primary-400" style="animation: pulse 2s infinite;"></div>
+                        <div class="absolute top-1/2 left-1/3 w-2 h-2 rounded-full bg-primary-400" style="animation: pulse 2s infinite; animation-delay: 0.3s;"></div>
+                        <div class="absolute top-1/2 left-2/3 w-2 h-2 rounded-full bg-primary-400" style="animation: pulse 2s infinite; animation-delay: 0.6s;"></div>
+                    </div>
+                    
+                    <div class="glass rounded-xl p-4 text-center">
+                        <div class="w-12 h-12 rounded-lg bg-primary-600/20 flex items-center justify-center mx-auto mb-2">
+                            <i data-lucide="target" class="w-6 h-6 text-primary-400"></i>
+                        </div>
+                        <span class="text-sm text-gray-300">Intent Detection</span>
+                    </div>
+                    
+                    <div class="hidden md:block w-16 h-0.5 bg-gradient-to-r from-primary-600/50 to-primary-400/50 relative">
+                        <div class="absolute top-1/2 left-0 w-2 h-2 rounded-full bg-primary-400" style="animation: pulse 2s infinite;"></div>
+                        <div class="absolute top-1/2 left-1/3 w-2 h-2 rounded-full bg-primary-400" style="animation: pulse 2s infinite; animation-delay: 0.3s;"></div>
+                        <div class="absolute top-1/2 left-2/3 w-2 h-2 rounded-full bg-primary-400" style="animation: pulse 2s infinite; animation-delay: 0.6s;"></div>
+                    </div>
+                    
+                    <div class="glass rounded-xl p-4 text-center">
+                        <div class="w-12 h-12 rounded-lg bg-primary-600/20 flex items-center justify-center mx-auto mb-2">
+                            <i data-lucide="scan" class="w-6 h-6 text-primary-400"></i>
+                        </div>
+                        <span class="text-sm text-gray-300">Framework Analysis</span>
+                    </div>
+                </div>
+                
+                <div class="flex justify-center my-8">
+                    <div class="w-0.5 h-12 bg-gradient-to-b from-primary-600/50 to-primary-400/50 relative">
+                        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-2 h-2 rounded-full bg-primary-400" style="animation: pulse 2s infinite;"></div>
+                        <div class="absolute top-1/3 left-1/2 transform -translate-x-1/2 w-2 h-2 rounded-full bg-primary-400" style="animation: pulse 2s infinite; animation-delay: 0.3s;"></div>
+                        <div class="absolute top-2/3 left-1/2 transform -translate-x-1/2 w-2 h-2 rounded-full bg-primary-400" style="animation: pulse 2s infinite; animation-delay: 0.6s;"></div>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="glass rounded-xl p-4 text-center">
+                        <div class="w-12 h-12 rounded-lg bg-primary-600/20 flex items-center justify-center mx-auto mb-2">
+                            <i data-lucide="layout-template" class="w-6 h-6 text-primary-400"></i>
+                        </div>
+                        <span class="text-sm text-gray-300">Template Engine</span>
+                    </div>
+                    
+                    <div class="hidden md:block w-16 h-0.5 bg-gradient-to-r from-primary-400/50 to-primary-600/50 relative">
+                        <div class="absolute top-1/2 left-0 w-2 h-2 rounded-full bg-primary-400" style="animation: pulse 2s infinite;"></div>
+                        <div class="absolute top-1/2 left-1/3 w-2 h-2 rounded-full bg-primary-400" style="animation: pulse 2s infinite; animation-delay: 0.3s;"></div>
+                        <div class="absolute top-1/2 left-2/3 w-2 h-2 rounded-full bg-primary-400" style="animation: pulse 2s infinite; animation-delay: 0.6s;"></div>
+                    </div>
+                    
+                    <div class="glass rounded-xl p-4 text-center">
+                        <div class="w-12 h-12 rounded-lg bg-primary-600/20 flex items-center justify-center mx-auto mb-2">
+                            <i data-lucide="folder-plus" class="w-6 h-6 text-primary-400"></i>
+                        </div>
+                        <span class="text-sm text-gray-300">Folder Generator</span>
+                    </div>
+                    
+                    <div class="hidden md:block w-16 h-0.5 bg-gradient-to-r from-primary-400/50 to-primary-600/50 relative">
+                        <div class="absolute top-1/2 left-0 w-2 h-2 rounded-full bg-primary-400" style="animation: pulse 2s infinite;"></div>
+                        <div class="absolute top-1/2 left-1/3 w-2 h-2 rounded-full bg-primary-400" style="animation: pulse 2s infinite; animation-delay: 0.3s;"></div>
+                        <div class="absolute top-1/2 left-2/3 w-2 h-2 rounded-full bg-primary-400" style="animation: pulse 2s infinite; animation-delay: 0.6s;"></div>
+                    </div>
+                    
+                    <div class="glass rounded-xl p-4 text-center">
+                        <div class="w-12 h-12 rounded-lg bg-primary-600/20 flex items-center justify-center mx-auto mb-2">
+                            <i data-lucide="archive" class="w-6 h-6 text-primary-400"></i>
+                        </div>
+                        <span class="text-sm text-gray-300">ZIP Builder</span>
+                    </div>
+                    
+                    <div class="hidden md:block w-16 h-0.5 bg-gradient-to-r from-primary-400/50 to-primary-600/50 relative">
+                        <div class="absolute top-1/2 left-0 w-2 h-2 rounded-full bg-primary-400" style="animation: pulse 2s infinite;"></div>
+                        <div class="absolute top-1/2 left-1/3 w-2 h-2 rounded-full bg-primary-400" style="animation: pulse 2s infinite; animation-delay: 0.3s;"></div>
+                        <div class="absolute top-1/2 left-2/3 w-2 h-2 rounded-full bg-primary-400" style="animation: pulse 2s infinite; animation-delay: 0.6s;"></div>
+                    </div>
+                    
+                    <div class="glass rounded-xl p-4 text-center node-pulse">
+                        <div class="w-12 h-12 rounded-lg bg-primary-600/20 flex items-center justify-center mx-auto mb-2">
+                            <i data-lucide="download" class="w-6 h-6 text-primary-400"></i>
+                        </div>
+                        <span class="text-sm text-gray-300">Download</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Project Preview Section -->
+    <section class="relative z-10 py-20 px-6">
+        <div class="max-w-[1400px] mx-auto">
+            <div class="text-center mb-16">
+                <span class="feature-chip text-xs font-medium px-3 py-1.5 rounded-full text-primary-300 inline-block mb-4">Why Folder AI</span>
+                <h2 class="font-heading text-4xl md:text-5xl font-bold mb-6">Traditional Development vs Folder AI</h2>
+                <p class="text-gray-400 text-lg max-w-2xl mx-auto">
+                    See how Folder AI transforms your development workflow.
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="glass rounded-2xl p-8">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded-xl bg-red-600/20 flex items-center justify-center">
+                            <i data-lucide="x" class="w-5 h-5 text-red-400"></i>
+                        </div>
+                        <h3 class="font-heading text-xl font-semibold">Traditional Development</h3>
+                    </div>
+                    
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3">
+                            <i data-lucide="x-circle" class="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5"></i>
+                            <span class="text-gray-400">Manual folder structure creation takes hours</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i data-lucide="x-circle" class="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5"></i>
+                            <span class="text-gray-400">Inconsistent project structures across teams</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i data-lucide="x-circle" class="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5"></i>
+                            <span class="text-gray-400">Missing best practices and optimization</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i data-lucide="x-circle" class="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5"></i>
+                            <span class="text-gray-400">Time-consuming documentation writing</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i data-lucide="x-circle" class="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5"></i>
+                            <span class="text-gray-400">Difficulty maintaining consistency in large projects</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="glass rounded-2xl p-8 comparison-highlight glow-border">
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 rounded-xl bg-primary-600/20 flex items-center justify-center">
+                                <i data-lucide="check" class="w-5 h-5 text-primary-400"></i>
+                            </div>
+                            <h3 class="font-heading text-xl font-semibold">Folder AI</h3>
+                        </div>
+                        
+                        <ul class="space-y-4">
+                            <li class="flex items-start gap-3">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-primary-400 flex-shrink-0 mt-0.5"></i>
+                                <span class="text-gray-300">Generate complete structures in seconds</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-primary-400 flex-shrink-0 mt-0.5"></i>
+                                <span class="text-gray-300">Consistent, best-practice architectures</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-primary-400 flex-shrink-0 mt-0.5"></i>
+                                <span class="text-gray-300">Optimized for scalability and performance</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-primary-400 flex-shrink-0 mt-0.5"></i>
+                                <span class="text-gray-300">Auto-generated comprehensive documentation</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-primary-400 flex-shrink-0 mt-0.5"></i>
+                                <span class="text-gray-300">Enterprise-grade consistency across all projects</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section class="relative z-10 py-20 px-6">
+        <div class="max-w-[1400px] mx-auto">
+            <div class="glass-light rounded-3xl p-8 md:p-12">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                    <div class="text-center">
+                        <div class="text-5xl md:text-6xl font-heading font-bold text-primary-400 counter" data-target="100">0</div>
+                        <div class="text-gray-400 mt-2">Project Templates</div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="text-5xl md:text-6xl font-heading font-bold text-primary-400 counter" data-target="50">0</div>
+                        <div class="text-gray-400 mt-2">Frameworks</div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="text-5xl md:text-6xl font-heading font-bold text-primary-400 counter" data-target="1000">0</div>
+                        <div class="text-gray-400 mt-2">Folders Generated</div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="text-5xl md:text-6xl font-heading font-bold text-primary-400 counter" data-target="99">0</div>
+                        <div class="text-gray-400 mt-2">Accuracy %</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials section removed as irrelevant to project -->
+
+    <!-- FAQ and Call to Action sections removed as irrelevant to project -->
+
+    <!-- Ultra Luxury Minimal Footer -->
+    <footer class="relative z-10 bg-black border-t border-white/5 py-16 px-6 font-sans">
+        <div class="max-w-[1200px] mx-auto">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 pb-12">
+                <!-- Column 1: Brand & Logo -->
+                <div class="col-span-2 md:col-span-1 space-y-4">
+                    <a href="/" class="flex items-center space-x-2">
+                        <div class="w-6 h-6 rounded bg-white flex items-center justify-center">
+                            <i data-lucide="folder-tree" class="w-4 h-4 text-black"></i>
+                        </div>
+                        <span class="font-heading font-bold text-lg text-white">Folder AI</span>
+                    </a>
+                    <p class="text-xs text-gray-500 max-w-[200px]">
+                        Compile production-ready project architectures dynamically.
+                    </p>
+                </div>
+
+                <!-- Column 2: Product -->
+                <div>
+                    <h4 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Product</h4>
+                    <ul class="space-y-3">
+                        <li><a href="/#features" class="text-gray-500 hover:text-white transition-colors text-xs">Features</a></li>
+                        <li><a href="/#how-it-works" class="text-gray-500 hover:text-white transition-colors text-xs">How It Works</a></li>
+                        <li><a href="/app" class="text-gray-500 hover:text-white transition-colors text-xs">Generator</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 3: Resources -->
+                <div>
+                    <h4 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Resources</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-500 hover:text-white transition-colors text-xs">Documentation</a></li>
+                        <li><a href="#" class="text-gray-500 hover:text-white transition-colors text-xs">API Reference</a></li>
+                        <li><a href="#" class="text-gray-500 hover:text-white transition-colors text-xs">Examples</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 4: Connect -->
+                <div>
+                    <h4 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Connect</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-500 hover:text-white transition-colors text-xs">GitHub</a></li>
+                        <li><a href="#" class="text-gray-500 hover:text-white transition-colors text-xs">Twitter</a></li>
+                        <li><a href="#" class="text-gray-500 hover:text-white transition-colors text-xs">Discord</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Bottom Sub-Footer -->
+            <div class="flex flex-col sm:flex-row justify-between items-center pt-8 border-t border-white/5 gap-4">
+                <div class="text-xs text-gray-500 font-mono">
+                    © 2023 Folder AI. All rights reserved.
+                </div>
+                
+                <!-- Social Links -->
+                <div class="flex items-center space-x-4">
+                    <a href="#" class="text-gray-500 hover:text-white transition-colors">
+                        <i data-lucide="github" class="w-4 h-4"></i>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-white transition-colors">
+                        <i data-lucide="twitter" class="w-4 h-4"></i>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-white transition-colors">
+                        <i data-lucide="linkedin" class="w-4 h-4"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <script>
-    (function() {
-        'use strict';
+        // Initialize Lucide icons
+        lucide.createIcons();
 
-        const promptInput       = document.getElementById('promptInput');
-        const generateBtn       = document.getElementById('generateBtn');
-        const demoModeCheckbox  = document.getElementById('demoModeCheckbox');
-        const exampleBtn        = document.getElementById('exampleBtn');
-        const loadingOverlay    = document.getElementById('loadingOverlay');
-        const resultsSection    = document.getElementById('resultsSection');
-        const emptyState        = document.getElementById('emptyState');
-        const toastContainer    = document.getElementById('toastContainer');
-        const topProgressBar    = document.getElementById('topProgressBar');
+        // Mouse follow light
+        const mouseLight = document.getElementById('mouseLight');
+        document.addEventListener('mousemove', (e) => {
+            mouseLight.style.left = `${e.clientX}px`;
+            mouseLight.style.top = `${e.clientY}px`;
+        });
 
-        function setPreloaderProgress(percent) {
-            if (!topProgressBar) return;
-            topProgressBar.style.width = percent + '%';
-            if (percent >= 100) {
-                setTimeout(() => {
-                    topProgressBar.style.opacity = '0';
-                    setTimeout(() => {
-                        topProgressBar.style.width = '0%';
-                        topProgressBar.style.opacity = '1';
-                    }, 300);
-                }, 400);
+        // Header scroll effect
+        const header = document.getElementById('header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.classList.add('header-scrolled');
             } else {
-                topProgressBar.style.opacity = '1';
-            }
-        }
-
-        // Trigger initial page load progress
-        setPreloaderProgress(30);
-        setTimeout(() => setPreloaderProgress(65), 180);
-        setTimeout(() => setPreloaderProgress(100), 380);
-
-        function showToast(message, type) {
-            type = type || 'info';
-            const el = document.createElement('div');
-            el.className = 'toast toast--' + type;
-            el.textContent = message;
-            toastContainer.appendChild(el);
-            setTimeout(function() {
-                el.classList.add('toast--exit');
-                el.addEventListener('animationend', function() { el.remove(); });
-            }, 2800);
-        }
-
-        function getApiUrl(path) {
-            if (window.location.port !== '5000') {
-                return 'http://127.0.0.1:5000' + path;
-            }
-            return path;
-        }
-
-        function getFileIcon(filename) {
-            const ext = filename.split('.').pop().toLowerCase();
-            const map = {
-                'js':   ['fab fa-js',        'text-yellow-400'],
-                'jsx':  ['fab fa-react',      'text-cyan-400'],
-                'ts':   ['fas fa-code',       'text-blue-400'],
-                'tsx':  ['fab fa-react',      'text-cyan-300'],
-                'py':   ['fab fa-python',     'text-yellow-300'],
-                'rb':   ['fas fa-gem',        'text-red-400'],
-                'go':   ['fab fa-golang',     'text-sky-300'],
-                'rs':   ['fas fa-gear',       'text-orange-400'],
-                'java': ['fab fa-java',       'text-red-300'],
-                'html': ['fab fa-html5',      'text-orange-500'],
-                'css':  ['fab fa-css3-alt',   'text-blue-400'],
-                'scss': ['fab fa-sass',       'text-pink-400'],
-                'json': ['fas fa-brackets-curly','text-yellow-200'],
-                'md':   ['fab fa-markdown',   'text-gray-300'],
-                'env':  ['fas fa-lock',       'text-green-400'],
-                'git':  ['fab fa-git-alt',    'text-orange-400'],
-                'yml':  ['fas fa-file-lines', 'text-pink-300'],
-                'yaml': ['fas fa-file-lines', 'text-pink-300'],
-                'txt':  ['fas fa-file-lines', 'text-gray-400'],
-                'svg':  ['fas fa-image',      'text-green-300'],
-                'png':  ['fas fa-image',      'text-green-300'],
-                'jpg':  ['fas fa-image',      'text-green-300'],
-                'ico':  ['fas fa-image',      'text-green-300'],
-                'sql':  ['fas fa-database',   'text-blue-300'],
-                'sh':   ['fas fa-terminal',   'text-green-400'],
-                'dockerfile': ['fab fa-docker','text-blue-400'],
-                'lock': ['fas fa-lock',       'text-gray-500'],
-                'toml': ['fas fa-file-code',  'text-orange-300'],
-                'cfg':  ['fas fa-cog',        'text-gray-400'],
-                'conf': ['fas fa-cog',        'text-gray-400'],
-            };
-            const special = {
-                'dockerfile':     ['fab fa-docker',   'text-blue-400'],
-                '.dockerignore':  ['fab fa-docker',   'text-blue-300'],
-                '.gitignore':     ['fab fa-git-alt',  'text-orange-400'],
-                '.env':           ['fas fa-lock',     'text-green-400'],
-                '.env.local':     ['fas fa-lock',     'text-green-400'],
-                '.env.example':   ['fas fa-lock',     'text-emerald-300'],
-                'readme.md':      ['fas fa-book',     'text-sky-300'],
-                'package.json':   ['fab fa-npm',      'text-red-400'],
-                'requirements.txt':['fab fa-python',  'text-yellow-300'],
-                'makefile':       ['fas fa-terminal',  'text-gray-300'],
-            };
-            const lowerName = filename.toLowerCase();
-            if (special[lowerName]) {
-                return '<i class="' + special[lowerName][0] + ' ' + special[lowerName][1] + '"></i>';
-            }
-            if (map[ext]) {
-                return '<i class="' + map[ext][0] + ' ' + map[ext][1] + '"></i>';
-            }
-            return '<i class="fas fa-file text-gray-500"></i>';
-        }
-
-        function escapeHtml(str) {
-            const div = document.createElement('div');
-            div.appendChild(document.createTextNode(str));
-            return div.innerHTML;
-        }
-
-        function countStructure(structureObj) {
-            let folders = 0, files = 0;
-            function walk(obj) {
-                if (!obj || typeof obj !== 'object') return;
-                for (const key in obj) {
-                    if (!obj.hasOwnProperty(key)) continue;
-                    if (obj[key] && typeof obj[key] === 'object') {
-                        folders++;
-                        walk(obj[key]);
-                    } else {
-                        files++;
-                    }
-                }
-            }
-            walk(structureObj);
-            return { folders, files };
-        }
-
-        function structureToText(structureObj, prefix = '') {
-            let lines = [];
-            if (!structureObj || typeof structureObj !== 'object') return '';
-            const keys = Object.keys(structureObj);
-            keys.forEach((name, idx) => {
-                const isLast = idx === keys.length - 1;
-                const connector = isLast ? '└── ' : '├── ';
-                const content = structureObj[name];
-                const isFolder = content && typeof content === 'object';
-                lines.push(prefix + connector + name);
-                if (isFolder) {
-                    const newPrefix = prefix + (isLast ? '    ' : '│   ');
-                    lines.push(structureToText(content, newPrefix));
-                }
-            });
-            return lines.join('\n');
-        }
-
-        function renderParsedInfo(parsed) {
-            if (!parsed) return document.createElement('div');
-            const card = document.createElement('div');
-            card.className = 'glass-card rounded-2xl p-5 md:p-6';
-            const featuresList = (parsed.features && Array.isArray(parsed.features)) ? parsed.features : [];
-            const projectType = parsed.project_type || 'unknown';
-            const frontend = parsed.frontend || '—';
-            const backend = parsed.backend || '—';
-            const database = parsed.database || '—';
-            card.innerHTML = `
-                <div class="flex flex-wrap justify-between items-center gap-3 border-b border-white/10 pb-3 mb-4">
-                    <h2 class="text-lg font-bold flex items-center gap-2"><i class="fas fa-brain text-sky-300"></i> Parsed Intent</h2>
-                    <span class="px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-sky-500/20 text-sky-200 border border-sky-400/25">${escapeHtml(projectType)}</span>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="bg-white/[0.03] rounded-xl p-3 border border-white/5">
-                        <div class="text-gray-500 text-[10px] uppercase tracking-widest mb-1">Frontend</div>
-                        <div class="text-base font-semibold flex items-center gap-2"><i class="fab fa-react text-cyan-400"></i> ${escapeHtml(frontend)}</div>
-                    </div>
-                    <div class="bg-white/[0.03] rounded-xl p-3 border border-white/5">
-                        <div class="text-gray-500 text-[10px] uppercase tracking-widest mb-1">Backend</div>
-                        <div class="text-base font-semibold flex items-center gap-2"><i class="fas fa-server text-emerald-400"></i> ${escapeHtml(backend)}</div>
-                    </div>
-                    <div class="bg-white/[0.03] rounded-xl p-3 border border-white/5">
-                        <div class="text-gray-500 text-[10px] uppercase tracking-widest mb-1">Database</div>
-                        <div class="text-base font-semibold flex items-center gap-2"><i class="fas fa-database text-amber-400"></i> ${escapeHtml(database)}</div>
-                    </div>
-                    <div class="bg-white/[0.03] rounded-xl p-3 border border-white/5">
-                        <div class="text-gray-500 text-[10px] uppercase tracking-widest mb-1">Features</div>
-                        <div class="flex flex-wrap gap-1.5 mt-1">${featuresList.length ? featuresList.map(f => `<span class="feature-tag text-[11px] px-2 py-0.5 rounded-full">${escapeHtml(f)}</span>`).join('') : '<span class="text-sm text-gray-500">—</span>'}</div>
-                    </div>
-                </div>
-            `;
-            return card;
-        }
-
-        let currentStructure = null;
-
-        function setNodeExpanded(li, expanded, animate = true) {
-            const childUl = li.querySelector(':scope > ul');
-            if (!childUl) return;
-            const divItem = li.querySelector(':scope > .folder-item');
-            if (!divItem) return;
-            const iconSpan = divItem.querySelector('.tree-icon');
-            const toggleIcon = divItem.querySelector('.fa-chevron-down, .fa-chevron-right');
-            
-            if (expanded) {
-                li.setAttribute('aria-expanded', 'true');
-                if (toggleIcon) {
-                    toggleIcon.style.transform = 'rotate(0deg)';
-                    toggleIcon.className = 'fas fa-chevron-down text-gray-500 text-[9px] transition-transform duration-200 ml-0.5';
-                }
-                if (iconSpan) iconSpan.innerHTML = '<i class="fas fa-folder-open text-amber-400"></i>';
-                
-                if (animate) {
-                    gsap.killTweensOf(childUl);
-                    childUl.style.display = 'block';
-                    gsap.fromTo(childUl, 
-                        { height: 0, opacity: 0, overflow: 'hidden' }, 
-                        { height: 'auto', opacity: 1, duration: 0.25, ease: 'power2.out', clearProps: 'overflow,height' }
-                    );
-                } else {
-                    childUl.style.display = 'block';
-                }
-            } else {
-                li.setAttribute('aria-expanded', 'false');
-                if (toggleIcon) {
-                    toggleIcon.style.transform = 'rotate(-90deg)';
-                }
-                if (iconSpan) iconSpan.innerHTML = '<i class="fas fa-folder text-amber-500/80"></i>';
-                
-                if (animate) {
-                    gsap.killTweensOf(childUl);
-                    gsap.to(childUl, {
-                        height: 0, opacity: 0, duration: 0.2, ease: 'power2.out', overflow: 'hidden',
-                        onComplete: () => { childUl.style.display = 'none'; }
-                    });
-                } else {
-                    childUl.style.display = 'none';
-                }
-            }
-        }
-
-        function buildTreeView(structureObj) {
-            if (!structureObj || typeof structureObj !== 'object') return null;
-            const container = document.createElement('ul');
-            container.className = 'space-y-1';
-            container.setAttribute('role', 'tree');
-            const keys = Object.keys(structureObj);
-            keys.forEach(name => {
-                const content = structureObj[name];
-                const isFolder = content && typeof content === 'object';
-                const li = document.createElement('li');
-                li.className = 'tree-node';
-                li.setAttribute('role', 'treeitem');
-                const divItem = document.createElement('div');
-                divItem.className = `flex items-center py-1 px-2 ${isFolder ? 'folder-item' : 'file-item'}`;
-                const iconSpan = document.createElement('span');
-                iconSpan.className = 'tree-icon';
-                if (isFolder) {
-                    iconSpan.innerHTML = '<i class="fas fa-folder-open text-amber-400"></i>';
-                    const nameSpan = document.createElement('span');
-                    nameSpan.className = 'flex items-center gap-1.5 font-medium text-gray-200';
-                    nameSpan.innerHTML = escapeHtml(name);
-                    const toggleIcon = document.createElement('i');
-                    toggleIcon.className = 'fas fa-chevron-down text-gray-500 text-[9px] transition-transform duration-200 ml-0.5';
-                    nameSpan.appendChild(toggleIcon);
-                    divItem.appendChild(iconSpan);
-                    divItem.appendChild(nameSpan);
-                    const childUl = document.createElement('ul');
-                    childUl.className = 'nested-list mt-0.5 space-y-1';
-                    childUl.setAttribute('role', 'group');
-                    const childContent = buildTreeView(content);
-                    if (childContent) childUl.appendChild(childContent);
-                    childUl.style.display = 'block';
-                    li.appendChild(divItem);
-                    li.appendChild(childUl);
-                    li.setAttribute('aria-expanded', 'true');
-                    
-                    divItem.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const isExpanded = li.getAttribute('aria-expanded') === 'true';
-                        setNodeExpanded(li, !isExpanded, true);
-                    });
-                } else {
-                    iconSpan.innerHTML = getFileIcon(name);
-                    const fileNameSpan = document.createElement('span');
-                    fileNameSpan.className = 'text-sm text-gray-300';
-                    fileNameSpan.textContent = name;
-                    divItem.appendChild(iconSpan);
-                    divItem.appendChild(fileNameSpan);
-                    li.appendChild(divItem);
-                }
-                container.appendChild(li);
-            });
-            return container;
-        }
-
-        function renderStructureTree(structure) {
-            const stats = countStructure(structure);
-            const card = document.createElement('div');
-            card.className = 'glass-card rounded-2xl p-5 md:p-6';
-            card.innerHTML = `
-                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3 mb-4">
-                    <div class="flex items-center gap-3">
-                        <h2 class="text-lg font-bold flex items-center gap-2"><i class="fas fa-sitemap text-sky-300"></i> Folder Hierarchy</h2>
-                        <div class="flex items-center gap-2 text-[11px]">
-                            <span class="stat-pill px-2 py-0.5 rounded-full flex items-center gap-1"><i class="fas fa-folder text-amber-400"></i> ${stats.folders}</span>
-                            <span class="stat-pill px-2 py-0.5 rounded-full flex items-center gap-1"><i class="fas fa-file text-sky-400"></i> ${stats.files}</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <input id="treeSearch" type="text" placeholder="Filter files..." class="search-input text-xs rounded-lg px-3 py-1.5 w-36 focus:outline-none text-white placeholder-gray-500" aria-label="Filter files in tree">
-                        <button id="expandAllBtn" class="btn-ghost text-[11px] px-2.5 py-1.5 rounded-lg text-gray-400" title="Expand all"><i class="fas fa-angles-down"></i></button>
-                        <button id="collapseAllBtn" class="btn-ghost text-[11px] px-2.5 py-1.5 rounded-lg text-gray-400" title="Collapse all"><i class="fas fa-angles-up"></i></button>
-                        <button id="copyTextBtn" class="btn-ghost text-[11px] px-2.5 py-1.5 rounded-lg text-gray-400" title="Copy as text"><i class="fas fa-copy"></i></button>
-                        <button id="downloadFolderBtn" class="btn-ghost text-[11px] px-2.5 py-1.5 rounded-lg text-green-400" title="Download folder as ZIP"><i class="fas fa-download"></i></button>
-                        <button id="downloadJsonBtn" class="btn-ghost text-[11px] px-2.5 py-1.5 rounded-lg text-gray-400" title="Download JSON structure"><i class="fas fa-file-code"></i></button>
-                    </div>
-                </div>
-                <div id="dynamicTreeContainer" class="overflow-auto max-h-[65vh] pr-2 font-mono text-sm leading-relaxed"></div>
-            `;
-            const treeContainer = card.querySelector('#dynamicTreeContainer');
-            if (structure && Object.keys(structure).length > 0) {
-                const treeView = buildTreeView(structure);
-                if (treeView) treeContainer.appendChild(treeView);
-            }
-            // Toolbar events
-            card.querySelector('#expandAllBtn').addEventListener('click', () => {
-                card.querySelectorAll('.tree-node').forEach(li => {
-                    setNodeExpanded(li, true, true);
-                });
-            });
-            card.querySelector('#collapseAllBtn').addEventListener('click', () => {
-                card.querySelectorAll('.tree-node').forEach(li => {
-                    setNodeExpanded(li, false, true);
-                });
-            });
-            card.querySelector('#copyTextBtn').addEventListener('click', () => {
-                const text = structureToText(currentStructure);
-                navigator.clipboard.writeText(text).then(() => showToast('Structure copied to clipboard', 'success')).catch(() => showToast('Failed to copy', 'error'));
-            });
-            // Download folder as ZIP using hidden form submission (most reliable method)
-            card.querySelector('#downloadFolderBtn').addEventListener('click', () => {
-                if (!currentStructure) {
-                    showToast('No folder generated yet. Generate a project first.', 'error');
-                    return;
-                }
-                // Create a hidden form that POSTs the structure to /download
-                // The browser natively handles the ZIP response as a file download
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = getApiUrl('/download');
-                form.style.display = 'none';
-
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'structure_json';
-                input.value = JSON.stringify(currentStructure);
-                form.appendChild(input);
-
-                document.body.appendChild(form);
-                form.submit();
-                form.remove();
-
-                showToast('Project folder downloading as ZIP...', 'success');
-            });
-            // Download JSON
-            card.querySelector('#downloadJsonBtn').addEventListener('click', () => {
-                const json = JSON.stringify(currentStructure, null, 2);
-                const blob = new Blob([json], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url; a.download = 'folder-structure.json'; a.click();
-                URL.revokeObjectURL(url);
-                showToast('JSON downloaded', 'success');
-            });
-            const searchInput = card.querySelector('#treeSearch');
-            searchInput.addEventListener('input', function() {
-                const query = this.value.toLowerCase().trim();
-                const allItems = card.querySelectorAll('.tree-node');
-                if (!query) {
-                    allItems.forEach(node => { node.style.display = ''; });
-                    return;
-                }
-                allItems.forEach(node => {
-                    const textEl = node.querySelector(':scope > div span');
-                    if (!textEl) return;
-                    const name = textEl.textContent.toLowerCase();
-                    let isMatch = name.includes(query);
-                    let descendantMatch = false;
-                    node.querySelectorAll('.tree-node').forEach(desc => {
-                        const descText = desc.querySelector(':scope > div span');
-                        if (descText && descText.textContent.toLowerCase().includes(query)) descendantMatch = true;
-                    });
-                    if (isMatch || descendantMatch) {
-                        node.style.display = '';
-                        let parent = node.parentElement;
-                        while (parent) {
-                            if (parent.classList && parent.classList.contains('nested-list')) parent.style.display = 'block';
-                            if (parent.classList && parent.classList.contains('tree-node')) parent.style.display = '';
-                            parent = parent.parentElement;
-                        }
-                    } else {
-                        node.style.display = 'none';
-                    }
-                });
-            });
-            return card;
-        }
-
-        // ----- Demo mode generator (original, kept as is) -----
-        function getDemoResponse(promptText) {
-            const lower = promptText.toLowerCase();
-            let frontend = 'React', backend = 'Node.js', database = 'MongoDB';
-            let features = [];
-            if (lower.includes('vue')) frontend = 'Vue.js';
-            else if (lower.includes('angular')) frontend = 'Angular';
-            else if (lower.includes('svelte')) frontend = 'Svelte';
-            else if (lower.includes('next')) frontend = 'Next.js';
-            if (lower.includes('flask') || lower.includes('python')) { backend = 'Flask'; database = 'PostgreSQL'; }
-            else if (lower.includes('django')) { backend = 'Django'; database = 'PostgreSQL'; }
-            else if (lower.includes('express')) backend = 'Express';
-            else if (lower.includes('fastapi')) { backend = 'FastAPI'; database = 'PostgreSQL'; }
-            else if (lower.includes('spring')) { backend = 'Spring Boot'; database = 'MySQL'; }
-            else if (lower.includes('rails')) { backend = 'Ruby on Rails'; database = 'PostgreSQL'; }
-            if (lower.includes('postgres')) database = 'PostgreSQL';
-            if (lower.includes('mysql')) database = 'MySQL';
-            if (lower.includes('sqlite')) database = 'SQLite';
-            if (lower.includes('firebase')) database = 'Firebase';
-            if (lower.includes('auth')) features.push('authentication');
-            if (lower.includes('dashboard')) features.push('dashboard');
-            if (lower.includes('payment') || lower.includes('stripe')) features.push('payments');
-            if (lower.includes('api')) features.push('REST API');
-            if (lower.includes('real-time') || lower.includes('socket') || lower.includes('chat')) features.push('real-time');
-            if (lower.includes('upload') || lower.includes('image')) features.push('file upload');
-            if (lower.includes('email') || lower.includes('notif')) features.push('notifications');
-            if (lower.includes('admin')) features.push('admin panel');
-            if (lower.includes('crud')) features.push('CRUD');
-            if (lower.includes('test')) features.push('testing');
-            if (lower.includes('deploy') || lower.includes('docker')) features.push('deployment');
-            if (lower.includes('swagger') || lower.includes('docs')) features.push('API docs');
-            if (features.length === 0) features = ['authentication', 'dashboard'];
-            const isFlask = backend === 'Flask' || backend === 'FastAPI' || backend === 'Django';
-            const isRails = backend === 'Ruby on Rails';
-            const isSpring = backend === 'Spring Boot';
-            let structure = {};
-            structure['.gitignore'] = null;
-            structure['README.md'] = null;
-            if (isFlask) {
-                structure.server = { app: { '__init__.py': null, 'routes.py': null, 'models.py': null } };
-                if (features.includes('authentication')) structure.server.app.auth = { '__init__.py': null, 'routes.py': null, 'utils.py': null };
-                structure.server.app.api = { '__init__.py': null, 'v1': { '__init__.py': null } };
-                structure.server.config = { '__init__.py': null, 'settings.py': null, 'development.py': null, 'production.py': null };
-                structure.server.migrations = { 'env.py': null, 'versions': {} };
-                structure.server.tests = { '__init__.py': null, 'conftest.py': null, 'test_routes.py': null };
-                structure.server['requirements.txt'] = null;
-                structure.server['run.py'] = null;
-                if (features.includes('deployment')) structure.server.Dockerfile = null;
-            } else if (isRails) {
-                structure.app = { controllers: {}, models: {}, views: {}, helpers: {}, mailers: {} };
-                structure.config = { 'routes.rb': null, 'database.yml': null };
-                structure.db = { migrate: {}, 'schema.rb': null };
-                structure.test = {};
-                structure['Gemfile'] = null;
-            } else if (isSpring) {
-                structure.server = { src: { main: { java: { com: { project: { 'Application.java': null, controller: {}, service: {}, repository: {}, model: {}, config: {} } } }, resources: { 'application.properties': null } }, test: {} } };
-                structure.server['pom.xml'] = null;
-            } else {
-                structure.client = {
-                    'src': {
-                        components: { common: {}, layout: {} },
-                        pages: {},
-                        hooks: {},
-                        utils: {},
-                        services: {},
-                        styles: { 'globals.css': null },
-                        'App.jsx': null,
-                        'main.jsx': null
-                    },
-                    'public': { 'index.html': null, 'favicon.ico': null },
-                    'package.json': null,
-                    'vite.config.js': null,
-                    '.env': null
-                };
-                if (features.includes('authentication')) {
-                    structure.client.src.pages['Login.jsx'] = null;
-                    structure.client.src.pages['Register.jsx'] = null;
-                    structure.client.src.components['ProtectedRoute.jsx'] = null;
-                }
-                if (features.includes('dashboard')) {
-                    structure.client.src.pages['Dashboard.jsx'] = null;
-                    structure.client.src.components['Sidebar.jsx'] = null;
-                    structure.client.src.components['StatsCard.jsx'] = null;
-                }
-                structure.server = {
-                    src: {
-                        controllers: { 'authController.js': null },
-                        models: { 'User.js': null },
-                        routes: { 'authRoutes.js': null, 'index.js': null },
-                        middleware: { 'auth.js': null, 'errorHandler.js': null },
-                        config: { 'db.js': null },
-                        utils: {},
-                        'app.js': null,
-                        'server.js': null
-                    },
-                    'package.json': null,
-                    '.env': null
-                };
-                if (features.includes('payments')) {
-                    structure.server.src.controllers['paymentController.js'] = null;
-                    structure.server.src.routes['paymentRoutes.js'] = null;
-                }
-                if (features.includes('real-time')) {
-                    structure.server.src['sockets'] = { 'handler.js': null };
-                }
-                if (features.includes('file upload')) {
-                    structure.server.src.middleware['upload.js'] = null;
-                    structure.uploads = { '.gitkeep': null };
-                }
-                if (features.includes('API docs')) {
-                    structure.server.src.config['swagger.js'] = null;
-                }
-            }
-            if (features.includes('deployment')) structure['docker-compose.yml'] = null;
-            if (features.includes('testing') && !isFlask && !isRails && !isSpring) {
-                structure.tests = { 'auth.test.js': null, 'api.test.js': null, 'setup.js': null };
-            }
-            return {
-                success: true,
-                parsed_prompt: {
-                    project_type: (frontend && backend) ? 'fullstack' : (frontend ? 'frontend' : 'backend'),
-                    frontend: frontend,
-                    backend: backend,
-                    database: database,
-                    features: features
-                },
-                structure: structure
-            };
-        }
-
-        // Live API call (relative URL, works because frontend is served from Flask)
-        async function callLiveAPI(prompt) {
-            const response = await fetch(getApiUrl('/generate'), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: prompt })
-            });
-            if (!response.ok) {
-                let errMsg = `HTTP ${response.status} (${response.statusText || 'No Status Text'}) on POST ${response.url}`;
-                try {
-                    const errData = await response.json();
-                    errMsg = errData.message || errMsg;
-                } catch(e) {}
-                throw new Error('Server error: ' + errMsg);
-            }
-            const data = await response.json();
-            if (!data.success) throw new Error(data.message || 'Generation failed');
-            return data;
-        }
-
-        async function handleGenerate() {
-            const prompt = promptInput.value.trim();
-            if (!prompt) {
-                showToast('Please enter a project description', 'error');
-                promptInput.focus();
-                return;
-            }
-            const useDemo = demoModeCheckbox.checked;
-            loadingOverlay.classList.remove('hidden');
-            setPreloaderProgress(20);
-            const interval = setInterval(() => {
-                const currentWidth = parseInt(topProgressBar.style.width || "0");
-                setPreloaderProgress(Math.min(90, currentWidth + 8));
-            }, 100);
-            try {
-                let resultData;
-                if (useDemo) {
-                    await new Promise(r => setTimeout(r, 700));
-                    resultData = getDemoResponse(prompt);
-                } else {
-                    resultData = await callLiveAPI(prompt);
-                }
-                clearInterval(interval);
-                setPreloaderProgress(100);
-                const structure = resultData.structure || {};
-                const parsed = resultData.parsed_prompt || { project_type: 'fullstack', frontend: 'React', backend: 'Node.js', database: 'MongoDB', features: [] };
-                currentStructure = structure;
-                resultsSection.innerHTML = '';
-                const parsedCard = renderParsedInfo(parsed);
-                const treeCard = renderStructureTree(structure);
-                resultsSection.appendChild(parsedCard);
-                resultsSection.appendChild(treeCard);
-                emptyState.classList.add('hidden');
-                resultsSection.classList.remove('hidden');
-                
-                // Luxury 3D Tilt perspective slide up animations
-                gsap.fromTo(parsedCard, 
-                    { opacity: 0, y: 50, rotateX: 8, transformOrigin: "top center" }, 
-                    { opacity: 1, y: 0, rotateX: 0, duration: 0.7, ease: 'power3.out' }
-                );
-                gsap.fromTo(treeCard, 
-                    { opacity: 0, y: 50, rotateX: 8, transformOrigin: "top center" }, 
-                    { opacity: 1, y: 0, rotateX: 0, duration: 0.7, delay: 0.1, ease: 'power3.out' }
-                );
-                
-                const items = treeCard.querySelectorAll('.folder-item, .file-item');
-                if (items.length < 80) {
-                    gsap.fromTo(items, { opacity: 0, x: -8 }, { opacity: 1, x: 0, stagger: 0.012, duration: 0.25, delay: 0.2 });
-                }
-                const stats = countStructure(structure);
-                showToast(`Structure generated — ${stats.files} files, ${stats.folders} folders`, 'success');
-            } catch (err) {
-                clearInterval(interval);
-                setPreloaderProgress(100);
-                console.error(err);
-                resultsSection.innerHTML = '';
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'glass-card rounded-2xl p-6 border border-red-500/30 text-center';
-                errorDiv.innerHTML = `
-                    <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-red-500/10 mb-4"><i class="fas fa-circle-exclamation text-3xl text-red-400"></i></div>
-                    <h3 class="text-lg font-semibold mb-2">Generation failed</h3>
-                    <p class="text-gray-400 text-sm max-w-md mx-auto">${escapeHtml(err.message || 'Could not connect to backend. Enable Demo Mode to preview.')}</p>
-                    <button id="toggleDemoHint" class="mt-5 btn-primary text-white font-medium py-2 px-5 rounded-xl text-sm inline-flex items-center gap-2"><i class="fas fa-flask"></i> Retry in Demo Mode</button>
-                `;
-                resultsSection.appendChild(errorDiv);
-                emptyState.classList.add('hidden');
-                resultsSection.classList.remove('hidden');
-                const toggleBtn = errorDiv.querySelector('#toggleDemoHint');
-                if (toggleBtn) {
-                    toggleBtn.addEventListener('click', () => {
-                        demoModeCheckbox.checked = true;
-                        handleGenerate();
-                    });
-                }
-                gsap.fromTo(errorDiv, { scale: 0.96, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.35 });
-            } finally {
-                loadingOverlay.classList.add('hidden');
-            }
-        }
-
-        const examplePrompts = [
-            'Create a MERN stack e-commerce platform with authentication, dashboard, and Stripe payments',
-            'Build a Flask + React fullstack app with PostgreSQL, login system, and REST API',
-            'Generate a Next.js 14 portfolio with Tailwind, dark mode, and blog',
-            'Node.js REST API with MongoDB, JWT authentication, Swagger docs, and Docker',
-            'Django backend with PostgreSQL, admin panel, authentication, and file upload',
-            'Vue 3 + Express project with real-time chat using Socket.io',
-            'SvelteKit SaaS app with Stripe subscriptions and Firebase auth',
-            'FastAPI microservice with Redis caching, JWT auth, and Docker deployment',
-        ];
-        let exampleIndex = 0;
-        function fillExamplePrompt() {
-            promptInput.value = examplePrompts[exampleIndex % examplePrompts.length];
-            exampleIndex++;
-            gsap.fromTo(promptInput, { scale: 1 }, { scale: 1.005, duration: 0.15, yoyo: true, repeat: 1 });
-        }
-
-        generateBtn.addEventListener('click', handleGenerate);
-        exampleBtn.addEventListener('click', fillExamplePrompt);
-        promptInput.addEventListener('keydown', (e) => {
-            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                e.preventDefault();
-                handleGenerate();
+                header.classList.remove('header-scrolled');
             }
         });
 
-        resultsSection.classList.add('hidden');
-        emptyState.classList.remove('hidden');
+        // Mobile menu
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const closeMobileMenu = document.getElementById('closeMobileMenu');
 
-        gsap.fromTo('#heroTitle', { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.7, ease: 'back.out(1.2)' });
-        gsap.fromTo('header p', { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.5, delay: 0.15 });
-        gsap.fromTo('section.glass-card', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, delay: 0.25 });
-        gsap.fromTo('#emptyState', { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.5, delay: 0.35 });
-    })();
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.remove('hidden');
+        });
+
+        closeMobileMenu.addEventListener('click', () => {
+            mobileMenu.classList.add('hidden');
+        });
+
+        // Close mobile menu when clicking on a link
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        });
+
+        // Accordion script block removed as accordion elements are deleted
+
+        // Counter animation
+        const counters = document.querySelectorAll('.counter');
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const counter = entry.target;
+                    const target = parseInt(counter.getAttribute('data-target'));
+                    const duration = 2000; // 2 seconds
+                    const start = performance.now();
+                    
+                    function updateCounter(currentTime) {
+                        const elapsed = currentTime - start;
+                        const progress = Math.min(elapsed / duration, 1);
+                        const easeOut = 1 - Math.pow(1 - progress, 3);
+                        const current = Math.floor(easeOut * target);
+                        counter.textContent = current + (target === 99 ? '%' : '+');
+                        if (progress < 1) {
+                            requestAnimationFrame(updateCounter);
+                        }
+                    }
+                    requestAnimationFrame(updateCounter);
+                    counterObserver.unobserve(counter);
+                }
+            });
+        }, { threshold: 0.5 });
+        
+        counters.forEach(counter => {
+            counterObserver.observe(counter);
+        });
+
+        // Scroll animations
+        const scrollElements = document.querySelectorAll('.card-hover, .tech-icon');
+        const scrollObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                    scrollObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        scrollElements.forEach(element => {
+            element.style.opacity = '0';
+            element.style.transform = 'translateY(20px)';
+            element.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            scrollObserver.observe(element);
+        });
+
+        // --- FOLDER AI CORE LOGIC ---
+        const aiPrompt = document.getElementById('aiPrompt');
+        const generateBtn = document.getElementById('generateBtn');
+        if (generateBtn) {
+        const livePreview = document.getElementById('livePreview');
+        const generatorStatus = document.getElementById('generatorStatus');
+        const detectedStack = document.getElementById('detectedStack');
+        const terminalLogs = document.getElementById('terminalLogs');
+        const charCount = document.getElementById('charCount');
+        
+        const treeContainer = document.getElementById('treeContainer');
+        const downloadBtn = document.getElementById('downloadBtn');
+        
+        const editorHeader = document.getElementById('editorHeader');
+        const editorTitle = document.getElementById('editorTitle');
+        const editorLanguage = document.getElementById('editorLanguage');
+        const editorPlaceholder = document.getElementById('editorPlaceholder');
+        const editorPre = document.getElementById('editorPre');
+
+        // State to store generated project structure
+        let generatedStructure = null;
+
+        // Auto-growing textarea & char count
+        aiPrompt.addEventListener('input', () => {
+            aiPrompt.style.height = 'auto';
+            aiPrompt.style.height = (aiPrompt.scrollHeight) + 'px';
+            charCount.textContent = aiPrompt.value.length;
+        });
+
+        // Preset pills click handler
+        const presets = document.querySelectorAll('.preset-pill');
+        presets.forEach(preset => {
+            preset.addEventListener('click', () => {
+                aiPrompt.value = preset.getAttribute('data-prompt');
+                aiPrompt.dispatchEvent(new Event('input'));
+                aiPrompt.focus();
+            });
+        });
+
+        // Logs print simulator with button progress bar synchronization
+        async function runTerminalSimulation(parsed) {
+            terminalLogs.innerHTML = '';
+            const btnProgressBar = document.getElementById('btnProgressBar');
+            const btnText = document.getElementById('btnText');
+            
+            const logs = [
+                { text: `[SYSTEM] Booting Folder AI compiler pipeline...`, delay: 100, progress: 5 },
+                { text: `[PARSE] Tokenizing natural language instructions...`, delay: 200, progress: 12 },
+                { text: `[PARSE] Extraction complete. Intent detected: ${parsed.language || 'Generic'} Full Stack Archetype`, delay: 150, progress: 20 },
+                { text: `[INFER] Selected Frontend Core: ${parsed.frontend || 'React (default)'}`, delay: 100, progress: 28 },
+                { text: `[INFER] Selected Backend Engine: ${parsed.backend || 'Flask (default)'}`, delay: 100, progress: 35 },
+                { text: `[INFER] Selected Storage Configuration: ${parsed.database || 'PostgreSQL (default)'}`, delay: 150, progress: 45 },
+                { text: `[INFER] Features list initialized: [${(parsed.features || []).join(', ') || 'basic'}]`, delay: 100, progress: 52 },
+                { text: `[TEMPLATE] Querying internal template generator database...`, delay: 150, progress: 60 },
+                { text: `[BUILD] Initializing directory construction on disk...`, delay: 200, progress: 70 },
+                { text: `[BUILD] Cleared target workspace directory: generated_project/`, delay: 100, progress: 75 },
+                { text: `[WRITE] Scaffolded project file nodes...`, delay: 250, progress: 85 },
+                { text: `[WRITE] Generated package.json dependency lists and scripts`, delay: 150, progress: 90 },
+                { text: `[WRITE] Created mock API controllers, models, and index entrypoints`, delay: 200, progress: 95 },
+                { text: `[SUCCESS] Output files successfully compiled on host file system!`, delay: 100, progress: 100, class: 'text-white font-bold bg-green-950/40 px-2 py-0.5 rounded border border-green-500/20' },
+                { text: `[SUCCESS] Folder AI Brain compilation step complete. Ready to preview.`, delay: 100, progress: 100, class: 'text-green-300 font-bold' }
+            ];
+
+            for (const log of logs) {
+                const line = document.createElement('div');
+                if (log.class) line.className = log.class;
+                line.innerHTML = `<span class="text-gray-600 select-none">$ </span>${log.text}`;
+                terminalLogs.appendChild(line);
+                terminalLogs.scrollTop = terminalLogs.scrollHeight;
+                
+                // Update button progress bar and text
+                btnProgressBar.style.width = `${log.progress}%`;
+                btnText.textContent = `Compiling Workspace... ${log.progress}%`;
+                
+                await new Promise(resolve => setTimeout(resolve, log.delay));
+            }
+        }
+
+        // Generate click handler
+        generateBtn.addEventListener('click', async () => {
+            const promptText = aiPrompt.value.trim();
+            if (!promptText) return;
+
+            // Show loading states on button
+            generateBtn.disabled = true;
+            const btnProgressBar = document.getElementById('btnProgressBar');
+            const btnText = document.getElementById('btnText');
+            const btnIcon = document.getElementById('btnIcon');
+            
+            btnProgressBar.style.width = '0%';
+            btnText.textContent = 'Analyzing Prompt...';
+            btnIcon.setAttribute('data-lucide', 'loader-2');
+            btnIcon.className = 'w-5 h-5 text-white animate-spin';
+            lucide.createIcons();
+            
+            // Show preview panel with smooth transition
+            livePreview.classList.remove('hidden');
+            setTimeout(() => {
+                livePreview.style.opacity = '1';
+                livePreview.style.transform = 'scale(1)';
+            }, 50);
+            
+            generatorStatus.textContent = 'Processing...';
+            detectedStack.innerHTML = '';
+            
+            treeContainer.innerHTML = '<div class="text-gray-500 italic p-4 text-center">Constructing project workspace...</div>';
+            
+            // Reset editor panel
+            editorHeader.classList.add('hidden');
+            editorPre.classList.add('hidden');
+            editorPlaceholder.classList.remove('hidden');
+            
+            // Disable Download Button
+            downloadBtn.disabled = true;
+            downloadBtn.className = "bg-gray-700 text-gray-500 text-xs font-semibold px-4 py-1.5 rounded-lg flex items-center gap-1.5 cursor-not-allowed transition-all duration-300";
+
+            try {
+                // Pre-loading text in console
+                terminalLogs.innerHTML = '<div class="text-gray-500 select-none">$ Initiating request...</div>';
+                
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ prompt: promptText })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    generatedStructure = data.structure;
+                    
+                    // Run the build terminal print logging simulation and button progress
+                    await runTerminalSimulation(data.parsed_prompt || {});
+                    
+                    generatorStatus.textContent = 'Success';
+                    
+                    // Render tags
+                    const parsed = data.parsed_prompt || {};
+                    const tags = [];
+                    if (parsed.language) tags.push({ name: parsed.language, type: 'language' });
+                    if (parsed.frontend) tags.push({ name: parsed.frontend, type: 'frontend' });
+                    if (parsed.backend) tags.push({ name: parsed.backend, type: 'backend' });
+                    if (parsed.database) tags.push({ name: parsed.database, type: 'database' });
+                    if (parsed.features && parsed.features.length) {
+                        parsed.features.forEach(f => tags.push({ name: f, type: 'feature' }));
+                    }
+
+                    detectedStack.innerHTML = tags.map(tag => {
+                        let colorClass = 'text-primary-300 bg-primary-600/20 border-primary-500/30';
+                        if (tag.type === 'language') colorClass = 'text-yellow-300 bg-yellow-600/20 border-yellow-500/30';
+                        if (tag.type === 'database') colorClass = 'text-green-300 bg-green-600/20 border-green-500/30';
+                        if (tag.type === 'feature') colorClass = 'text-purple-300 bg-purple-600/20 border-purple-500/30';
+                        return `<span class="border px-3 py-1 rounded-full text-xs font-mono font-medium ${colorClass}">${tag.name}</span>`;
+                    }).join('');
+
+                    // Populate dynamic tree
+                    renderTree(generatedStructure, treeContainer);
+                    
+                    // Enable Download Button
+                    downloadBtn.disabled = false;
+                    downloadBtn.className = "bg-green-600 hover:bg-green-500 text-white text-xs font-semibold px-4 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer shadow-lg shadow-green-900/30 transition-all duration-300 scale-105";
+                    
+                    // Make button show success check state
+                    generateBtn.className = "w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white font-heading font-semibold py-4 px-8 rounded-2xl flex items-center justify-center gap-3 transition-all duration-300 shadow-[0_0_30px_rgba(16,185,129,0.3)] relative overflow-hidden";
+                    btnText.textContent = "Workspace Compiled Successfully!";
+                    btnIcon.setAttribute('data-lucide', 'check-circle-2');
+                    btnIcon.className = "w-5 h-5 text-white animate-bounce";
+                    lucide.createIcons();
+
+                    // Scroll down to Project Preview Section
+                    setTimeout(() => {
+                        treeContainer.closest('section').scrollIntoView({ behavior: 'smooth' });
+                    }, 500);
+
+                    // Reset button after 4 seconds
+                    setTimeout(() => {
+                        generateBtn.disabled = false;
+                        generateBtn.className = "w-full bg-gradient-to-r from-primary-600 via-indigo-600 to-primary-500 text-white font-heading font-semibold py-4 px-8 rounded-2xl flex items-center justify-center gap-3 transition-all duration-300 transform active:scale-[0.99] hover:shadow-[0_0_30px_rgba(76,110,245,0.3)] relative overflow-hidden cursor-pointer";
+                        btnText.textContent = "Generate Project Architecture";
+                        btnIcon.setAttribute('data-lucide', 'sparkles');
+                        btnIcon.className = "w-5 h-5 text-white group-hover:rotate-12 transition-transform duration-300";
+                        btnProgressBar.style.width = '0%';
+                        lucide.createIcons();
+                    }, 4000);
+
+                } else {
+                    generatorStatus.textContent = 'Error';
+                    terminalLogs.innerHTML = `<div class="text-red-400 p-2">$ Error: ${data.error || 'Failed to generate project structure.'}</div>`;
+                    treeContainer.innerHTML = '<div class="text-red-400 p-4 text-center">Generation failed. Please try again.</div>';
+                    resetGenerateButtonError();
+                }
+            } catch (err) {
+                console.error(err);
+                generatorStatus.textContent = 'Network Error';
+                terminalLogs.innerHTML = '<div class="text-red-400 p-2">$ Error: Connection to backend host failed. Check Flask console.</div>';
+                treeContainer.innerHTML = '<div class="text-red-400 p-4 text-center">Network error. Is Flask running?</div>';
+                resetGenerateButtonError();
+            }
+        });
+
+        function resetGenerateButtonError() {
+            const btnText = document.getElementById('btnText');
+            const btnIcon = document.getElementById('btnIcon');
+            const btnProgressBar = document.getElementById('btnProgressBar');
+            
+            generateBtn.disabled = false;
+            generateBtn.className = "w-full bg-gradient-to-r from-red-600 to-rose-600 text-white font-heading font-semibold py-4 px-8 rounded-2xl flex items-center justify-center gap-3 transition-all duration-300 shadow-[0_0_30px_rgba(244,63,94,0.3)] relative overflow-hidden";
+            btnText.textContent = "Compilation Failed — Retry";
+            btnIcon.setAttribute('data-lucide', 'alert-circle');
+            btnIcon.className = "w-5 h-5 text-white";
+            btnProgressBar.style.width = '0%';
+            lucide.createIcons();
+            
+            setTimeout(() => {
+                generateBtn.className = "w-full bg-gradient-to-r from-primary-600 via-indigo-600 to-primary-500 text-white font-heading font-semibold py-4 px-8 rounded-2xl flex items-center justify-center gap-3 transition-all duration-300 transform active:scale-[0.99] hover:shadow-[0_0_30px_rgba(76,110,245,0.3)] relative overflow-hidden cursor-pointer";
+                btnText.textContent = "Generate Project Architecture";
+                btnIcon.setAttribute('data-lucide', 'sparkles');
+                btnIcon.className = "w-5 h-5 text-white group-hover:rotate-12 transition-transform duration-300";
+                lucide.createIcons();
+            }, 3000);
+        }
+
+        // Download ZIP click handler
+        downloadBtn.addEventListener('click', () => {
+            if (downloadBtn.disabled || !generatedStructure) return;
+            
+            // Submit a POST form with structure_json to reconstruct & download the exact previewed structure
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/download';
+            form.style.display = 'none';
+
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'structure_json';
+            input.value = JSON.stringify(generatedStructure);
+
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+        });
+
+        // Recursive tree rendering function
+        function renderTree(structure, parentElement) {
+            parentElement.innerHTML = '';
+            
+            function renderNode(name, data, isFolder, element, depth) {
+                const nodeContainer = document.createElement('div');
+                nodeContainer.className = 'flex flex-col';
+                
+                const row = document.createElement('div');
+                row.className = 'flex items-center gap-2 cursor-pointer hover:bg-dark-500/50 p-1.5 rounded transition-all duration-150 group';
+                row.style.paddingLeft = `${depth * 1.25}rem`;
+                
+                const chevron = document.createElement('i');
+                if (isFolder) {
+                    chevron.setAttribute('data-lucide', 'chevron-down');
+                    chevron.className = 'w-4 h-4 text-gray-500 transition-transform duration-200';
+                } else {
+                    chevron.className = 'w-4 h-4 opacity-0';
+                }
+                row.appendChild(chevron);
+                
+                const icon = document.createElement('i');
+                if (isFolder) {
+                    icon.setAttribute('data-lucide', 'folder');
+                    icon.className = 'w-4 h-4 text-primary-400 group-hover:scale-105 transition-transform';
+                } else {
+                    const extension = name.split('.').pop().toLowerCase();
+                    let iconName = 'file';
+                    let iconClass = 'text-gray-400';
+                    if (['py', 'js', 'jsx', 'ts', 'tsx', 'html', 'css', 'go', 'rs', 'java', 'cpp', 'c', 'php', 'rb'].includes(extension)) {
+                        iconName = 'file-code';
+                        iconClass = 'text-blue-400';
+                    } else if (extension === 'json') {
+                        iconName = 'file-json';
+                        iconClass = 'text-yellow-400';
+                    } else if (['md', 'txt'].includes(extension)) {
+                        iconName = 'file-text';
+                        iconClass = 'text-green-400';
+                    }
+                    icon.setAttribute('data-lucide', iconName);
+                    icon.className = `w-4 h-4 ${iconClass} group-hover:scale-105 transition-transform`;
+                }
+                row.appendChild(icon);
+                
+                const span = document.createElement('span');
+                span.textContent = name;
+                span.className = isFolder ? 'text-gray-300 font-medium font-mono text-xs' : 'text-gray-400 font-mono text-xs';
+                row.appendChild(span);
+                
+                nodeContainer.appendChild(row);
+                element.appendChild(nodeContainer);
+                
+                if (isFolder) {
+                    const childrenContainer = document.createElement('div');
+                    childrenContainer.className = 'transition-all duration-200';
+                    nodeContainer.appendChild(childrenContainer);
+                    
+                    renderTreeNodes(data, childrenContainer, depth + 1);
+                    
+                    row.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const isCollapsed = childrenContainer.classList.contains('hidden');
+                        if (isCollapsed) {
+                            childrenContainer.classList.remove('hidden');
+                            chevron.style.transform = 'rotate(0deg)';
+                        } else {
+                            childrenContainer.classList.add('hidden');
+                            chevron.style.transform = 'rotate(-90deg)';
+                        }
+                    });
+                } else {
+                    row.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        // Highlight active file
+                        document.querySelectorAll('#treeContainer .bg-dark-600').forEach(el => {
+                            el.classList.remove('bg-dark-600');
+                        });
+                        row.classList.add('bg-dark-600');
+                        
+                        showFileContent(name);
+                    });
+                }
+            }
+            
+            function renderTreeNodes(nodes, container, depth) {
+                if (!nodes) return;
+                // Sort: folders first, then files
+                const sortedKeys = Object.keys(nodes).sort((a, b) => {
+                    const isFolderA = typeof nodes[a] === 'object' && nodes[a] !== null;
+                    const isFolderB = typeof nodes[b] === 'object' && nodes[b] !== null;
+                    if (isFolderA && !isFolderB) return -1;
+                    if (!isFolderA && isFolderB) return 1;
+                    return a.localeCompare(b);
+                });
+                
+                sortedKeys.forEach(key => {
+                    const value = nodes[key];
+                    const isFolder = typeof value === 'object' && value !== null;
+                    const child = document.createElement('div');
+                    container.appendChild(child);
+                    renderNode(key, value, isFolder, child, depth);
+                });
+            }
+            
+            renderTreeNodes(structure, parentElement, 0);
+            lucide.createIcons();
+        }
+
+        // Show mock file contents in the code editor previewer
+        function showFileContent(filename) {
+            editorHeader.classList.remove('hidden');
+            editorPre.classList.remove('hidden');
+            editorPlaceholder.classList.add('hidden');
+            
+            editorTitle.textContent = filename;
+            
+            const extension = filename.split('.').pop().toLowerCase();
+            let langText = 'Plain Text';
+            let code = '';
+            
+            if (extension === 'py') {
+                langText = 'Python';
+                code = `import os
+import sys
+
+# Generated automatically by Folder AI structure generator
+# This file serves as the boilerplate entrypoint for this module.
+
+def main():
+    print("Welcome to ${filename} module!")
+    print("Python runtime environment successfully initialized.")
+
+if __name__ == "__main__":
+    main()`;
+            } else if (['js', 'jsx'].includes(extension)) {
+                langText = 'JavaScript React';
+                code = `// Generated by Folder AI react template
+import React, { useState, useEffect } from 'react';
+
+export default function Component() {
+    const [status, setStatus] = useState('initialized');
+
+    return (
+        <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
+            <h2>Hello from ${filename}!</h2>
+            <p>Component is currently: <strong>{status}</strong></p>
+        </div>
+    );
+}`;
+            } else if (['ts', 'tsx'].includes(extension)) {
+                langText = 'TypeScript React';
+                code = `// Generated by Folder AI react-ts template
+import React from 'react';
+
+interface Props {
+    title?: string;
+    description?: string;
+}
+
+export const Component: React.FC<Props> = ({ 
+    title = "Boilerplate Component", 
+    description = "Generated by Folder AI" 
+}) => {
+    return (
+        <div className="p-6 border rounded-xl shadow-sm bg-white">
+            <h3 className="text-xl font-bold text-gray-800">{title}</h3>
+            <p className="mt-2 text-gray-600">{description}</p>
+        </div>
+    );
+};`;
+            } else if (extension === 'json') {
+                langText = 'JSON';
+                code = `{
+  "name": "folder-ai-inferred-project",
+  "version": "1.0.0",
+  "description": "Production-ready structure generated by Folder AI",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \\"Error: no test specified\\" && exit 0"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "private": true
+}`;
+            } else if (extension === 'md') {
+                langText = 'Markdown';
+                code = `# Generated Project: Folder AI
+
+This project directory structure and config files were generated automatically from a natural language prompt.
+
+## 🚀 Getting Started
+
+Follow the configuration files inside individual directories to set up your environment.
+
+1. Install dependencies specific to your framework templates.
+2. Initialize database endpoints as configured.
+3. Enjoy building your application!
+
+*Generated with ❤️ by Folder AI.*`;
+            } else if (extension === 'html') {
+                langText = 'HTML';
+                code = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generated Boilerplate</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #fafafa; }
+        .card { padding: 3rem; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Hello from ${filename}</h1>
+        <p>This UI is ready for your customizations.</p>
+    </div>
+</body>
+</html>`;
+            } else {
+                langText = extension.toUpperCase();
+                code = `# Generated template file: ${filename}
+# Populate with your business logic.`;
+            }
+            
+            editorLanguage.textContent = langText;
+            
+            // Escape HTML characters
+            const escapedCode = code
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+                
+            const lines = escapedCode.split('\n');
+            let formattedHTML = '';
+            lines.forEach((line, index) => {
+                formattedHTML += `<span class="text-gray-500 inline-block w-8 text-right select-none pr-3 mr-2 border-r border-dark-400/20">${index + 1}</span><span class="text-gray-300 font-mono text-xs">${line}</span>\n`;
+            });
+            
+            editorPre.innerHTML = formattedHTML;
+        }
+            }
     </script>
 </body>
 </html>

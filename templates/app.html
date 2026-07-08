@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Folder AI — Generate Production-Ready Project Structures with AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        heading: ['Space Grotesk', 'sans-serif'],
+                        body: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#f0f4ff',
+                            100: '#dbe4ff',
+                            200: '#bac8ff',
+                            300: '#91a7ff',
+                            400: '#748ffc',
+                            500: '#5c7cfa',
+                            600: '#4c6ef5',
+                            700: '#4263eb',
+                            800: '#3b5bdb',
+                            900: '#364fc7',
+                        },
+                        dark: {
+                            50: '#C1C2C5',
+                            100: '#A6A7AB',
+                            200: '#909296',
+                            300: '#5C5F66',
+                            400: '#373A40',
+                            500: '#2C2E33',
+                            600: '#25262B',
+                            700: '#1A1B1E',
+                            800: '#141517',
+                            900: '#101113',
+                        }
+                    },
+                    borderRadius: {
+                        'xl': '24px',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0f;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #0a0a0f;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #25262b;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #364fc7;
+        }
+        
+        /* Glass effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .glass-light {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+        
+        /* Background effects */
+        .bg-gradient-radial {
+            background: radial-gradient(ellipse at center, rgba(76, 110, 245, 0.15) 0%, rgba(10, 10, 15, 0) 70%);
+        }
+        
+        .bg-gradient-aurora {
+            background: 
+                radial-gradient(ellipse at 20% 50%, rgba(76, 110, 245, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(130, 87, 229, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(59, 91, 219, 0.1) 0%, transparent 50%);
+        }
+        
+        /* Grid perspective */
+        .grid-perspective {
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            transform: perspective(500px) rotateX(60deg);
+            transform-origin: center top;
+            opacity: 0.3;
+        }
+        
+        /* Noise texture */
+        .noise::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        /* Floating particles */
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(76, 110, 245, 0.5);
+            border-radius: 50%;
+            animation: float 10s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            50% {
+                transform: translateY(-100px) translateX(50px);
+            }
+        }
+        
+        /* Glow effect */
+        .glow {
+            box-shadow: 0 0 20px rgba(76, 110, 245, 0.3);
+        }
+        
+        .glow-border {
+            border: 1px solid rgba(76, 110, 245, 0.3);
+        }
+        
+        /* Button effects */
+        .btn-primary {
+            background: linear-gradient(135deg, #4c6ef5, #5c7cfa);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(76, 110, 245, 0.4);
+        }
+        
+        .btn-secondary {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-2px);
+        }
+        
+        /* Card hover effects */
+        .card-hover {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: rgba(76, 110, 245, 0.3);
+        }
+        
+        /* Feature chips */
+        .feature-chip {
+            background: rgba(76, 110, 245, 0.1);
+            border: 1px solid rgba(76, 110, 245, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .feature-chip:hover {
+            background: rgba(76, 110, 245, 0.2);
+            border-color: rgba(76, 110, 245, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        /* Timeline connector */
+        .timeline-connector {
+            height: 2px;
+            background: linear-gradient(90deg, rgba(76, 110, 245, 0.5), rgba(76, 110, 245, 0.2));
+            position: relative;
+        }
+        
+        .timeline-connector::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: -3px;
+            width: 8px;
+            height: 8px;
+            border-right: 2px solid rgba(76, 110, 245, 0.5);
+            border-bottom: 2px solid rgba(76, 110, 245, 0.5);
+            transform: rotate(-45deg);
+        }
+        
+        /* Marquee */
+        .marquee-container {
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        
+        .marquee-content {
+            display: inline-block;
+            animation: marquee 30s linear infinite;
+        }
+        
+        @keyframes marquee {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+        
+        /* Accordion */
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .accordion-item.active .accordion-content {
+            max-height: 200px;
+        }
+        
+        .accordion-item.active .accordion-icon {
+            transform: rotate(45deg);
+        }
+        
+        .accordion-icon {
+            transition: transform 0.3s ease;
+        }
+        
+        /* Code editor */
+        .code-editor {
+            font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace;
+        }
+        
+        /* Animated counter */
+        .counter {
+            font-variant-numeric: tabular-nums;
+        }
+        
+        /* Technology icon hover */
+        .tech-icon {
+            transition: all 0.3s ease;
+        }
+        
+        .tech-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(76, 110, 245, 0.4);
+            border-color: rgba(76, 110, 245, 0.5);
+        }
+        
+        /* Flow chart animations */
+        .flow-connector {
+            stroke-dasharray: 8 4;
+            animation: dash 1.5s linear infinite;
+        }
+        
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -24;
+            }
+        }
+        
+        /* Node pulse */
+        .node-pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(76, 110, 245, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(76, 110, 245, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(76, 110, 245, 0);
+            }
+        }
+        
+        /* Folder animation */
+        .folder-tree-item {
+            animation: fadeInLeft 0.5s ease forwards;
+            opacity: 0;
+        }
+        
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* Comparison table */
+        .comparison-highlight {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .comparison-highlight::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(76, 110, 245, 0.1), rgba(76, 110, 245, 0.05));
+            z-index: 0;
+        }
+        
+        /* Header scroll effect */
+        .header-scrolled {
+            padding-top: 0.75rem !important;
+            padding-bottom: 0.75rem !important;
+            background: rgba(10, 10, 15, 0.8) !important;
+        }
+        
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Mouse follow light */
+        .mouse-light {
+            position: fixed;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(76, 110, 245, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.3s ease;
+        }
+
+        /* Infinite Scroll Keyframes & Classes */
+        @keyframes scroll-left {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        @keyframes scroll-right {
+            0% { transform: translateX(-50%); }
+            100% { transform: translateX(0); }
+        }
+        .animate-scroll-left {
+            animation: scroll-left 45s linear infinite;
+        }
+        .animate-scroll-right {
+            animation: scroll-right 45s linear infinite;
+        }
+        .scroll-track:hover .animate-scroll-left,
+        .scroll-track:hover .animate-scroll-right {
+            animation-play-state: paused;
+        }
+    </style>
+</head>
+<body class="noise">
+    <!-- Mouse follow light -->
+    <div class="mouse-light" id="mouseLight"></div>
+
+    <!-- Background effects -->
+    <div class="fixed inset-0 z-0">
+        <div class="absolute inset-0 bg-gradient-aurora"></div>
+        <div class="absolute inset-0 bg-gradient-radial"></div>
+        <div class="absolute bottom-0 left-0 right-0 h-[500px] grid-perspective"></div>
+        
+        <!-- Floating particles -->
+        <div class="particle" style="top: 20%; left: 10%; animation-delay: 0s;"></div>
+        <div class="particle" style="top: 40%; left: 30%; animation-delay: 2s;"></div>
+        <div class="particle" style="top: 60%; left: 70%; animation-delay: 4s;"></div>
+        <div class="particle" style="top: 80%; left: 90%; animation-delay: 6s;"></div>
+        <div class="particle" style="top: 30%; left: 50%; animation-delay: 8s;"></div>
+        <div class="particle" style="top: 70%; left: 20%; animation-delay: 10s;"></div>
+        <div class="particle" style="top: 50%; left: 80%; animation-delay: 12s;"></div>
+        <div class="particle" style="top: 10%; left: 60%; animation-delay: 14s;"></div>
+    </div>
+
+    <!-- Header -->
+    <header id="header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" style="padding: 1.5rem 0;">
+        <div class="max-w-[1400px] mx-auto px-6">
+            <nav class="glass rounded-2xl px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center">
+                    <a href="#" class="flex items-center space-x-2">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-600 to-primary-400 flex items-center justify-center">
+                            <i data-lucide="folder-tree" class="w-5 h-5 text-white"></i>
+                        </div>
+                        <span class="font-heading font-semibold text-lg">Folder AI</span>
+                    </a>
+                </div>
+                
+                <div class="hidden lg:flex items-center space-x-8">
+                    <a href="/#features" class="text-sm text-gray-300 hover:text-white transition-colors">Features</a>
+                    <a href="/#how-it-works" class="text-sm text-gray-300 hover:text-white transition-colors">How It Works</a>
+                    <a href="/#technology" class="text-sm text-gray-300 hover:text-white transition-colors">Technology</a>
+                    <a href="/app" class="text-sm text-gray-300 hover:text-white transition-colors">Try Generator</a>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-4">
+                    <a href="/app" class="btn-primary text-sm font-medium px-5 py-2.5 rounded-xl text-white">Generate Project</a>
+                </div>
+                
+                <button id="mobileMenuBtn" class="lg:hidden text-gray-300 hover:text-white">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+ 
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="fixed inset-0 z-40 hidden">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+        <div class="absolute right-0 top-0 bottom-0 w-72 bg-dark-800 p-6 flex flex-col">
+            <button id="closeMobileMenu" class="self-end text-gray-300 hover:text-white mb-8">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+            <div class="flex flex-col space-y-6">
+                <a href="/#features" class="text-gray-300 hover:text-white transition-colors">Features</a>
+                <a href="/#how-it-works" class="text-gray-300 hover:text-white transition-colors">How It Works</a>
+                <a href="/#technology" class="text-gray-300 hover:text-white transition-colors">Technology</a>
+                <a href="/app" class="btn-primary text-sm font-medium px-5 py-2.5 rounded-xl text-white text-center">Generate Project</a>
+            </div>
+        </div>
+    </div>
+ 
+    <!-- Hero Section -->
+    <section id="try-folder-ai" class="relative z-10 pt-36 pb-20 px-6">
+        <div class="max-w-[1400px] mx-auto">
+            <div class="glass-light rounded-3xl p-8 md:p-12 relative overflow-hidden border border-white/10 shadow-2xl">
+                <!-- Background decorative glow -->
+                <div class="absolute -top-40 -right-40 w-96 h-96 bg-primary-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+                <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-primary-900/30">
+                            <i data-lucide="sparkles" class="w-6 h-6 text-white animate-pulse"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-heading text-3xl font-bold tracking-tight bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">Project Structure Generator</h2>
+                            <p class="text-sm text-gray-400">Describe your project requirements to generate file architectures instantly</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prompt Card Console -->
+                <div class="glass rounded-2xl border border-white/10 shadow-xl overflow-hidden mb-6 focus-within:border-primary-500/50 transition-all duration-300">
+                    <!-- Console Header -->
+                    <div class="bg-dark-900/60 px-5 py-3 border-b border-white/5 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full bg-red-500/70"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500/70"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500/70"></div>
+                            <span class="text-xs text-gray-500 font-mono ml-2">prompt_console.sh</span>
+                        </div>
+                        <span class="text-[10px] text-gray-500 font-mono bg-white/5 px-2 py-0.5 rounded">v1.0.0</span>
+                    </div>
+
+                    <!-- Input Area -->
+                    <div class="p-6 bg-dark-800/40">
+                        <textarea 
+                            id="aiPrompt" 
+                            rows="3"
+                            placeholder="I want to create a CRM platform in Python Full Stack with dashboard, database, and auth controllers..." 
+                            class="w-full bg-transparent border-0 p-0 text-white placeholder-gray-500 focus:ring-0 focus:outline-none text-lg resize-none font-sans leading-relaxed"
+                        ></textarea>
+                    </div>
+
+                    <!-- Console Toolbar -->
+                    <div class="px-6 py-3 bg-dark-900/40 border-t border-white/5 flex items-center justify-between">
+                        <span class="text-xs text-gray-500 font-mono">
+                            <span id="charCount" class="text-gray-300">0</span> characters
+                        </span>
+                        <span class="text-xs text-gray-500 font-mono">Press Generate to compile files</span>
+                    </div>
+                </div>
+
+                <!-- Presets / Quick Starts -->
+                <div class="mb-8">
+                    <span class="text-xs font-mono text-gray-500 uppercase tracking-wider block mb-3">Quick Presets</span>
+                    <div class="flex flex-wrap gap-2.5">
+                        <button class="preset-pill bg-white/5 hover:bg-primary-600/10 border border-white/5 hover:border-primary-500/30 text-gray-300 hover:text-primary-300 text-xs px-4 py-2 rounded-xl transition-all duration-200 cursor-pointer font-mono" data-prompt="Create a React + Flask CRM platform with PostgreSQL, dashboard, and authentication">
+                            React + Flask CRM
+                        </button>
+                        <button class="preset-pill bg-white/5 hover:bg-primary-600/10 border border-white/5 hover:border-primary-500/30 text-gray-300 hover:text-primary-300 text-xs px-4 py-2 rounded-xl transition-all duration-200 cursor-pointer font-mono" data-prompt="Create MERN stack with authentication, user dashboard, and payment gate integrations">
+                            MERN E-Commerce
+                        </button>
+                        <button class="preset-pill bg-white/5 hover:bg-primary-600/10 border border-white/5 hover:border-primary-500/30 text-gray-300 hover:text-primary-300 text-xs px-4 py-2 rounded-xl transition-all duration-200 cursor-pointer font-mono" data-prompt="Create a Django SaaS template with Django REST Framework, SQLite, API routing, and models">
+                            Django SaaS DRF
+                        </button>
+                        <button class="preset-pill bg-white/5 hover:bg-primary-600/10 border border-white/5 hover:border-primary-500/30 text-gray-300 hover:text-primary-300 text-xs px-4 py-2 rounded-xl transition-all duration-200 cursor-pointer font-mono" data-prompt="Create a FastAPI backend service with MongoDB, CRUD endpoints, token auth, and schema validation">
+                            FastAPI Backend
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Redesigned Master Action Button -->
+                <div class="mb-8 relative group">
+                    <button id="generateBtn" class="w-full bg-gradient-to-r from-primary-600 via-indigo-600 to-primary-500 text-white font-heading font-semibold py-4 px-8 rounded-2xl flex items-center justify-center gap-3 transition-all duration-300 transform active:scale-[0.99] hover:shadow-[0_0_30px_rgba(76,110,245,0.3)] relative overflow-hidden cursor-pointer">
+                        <!-- Neon border background glow -->
+                        <div class="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                        <div class="absolute -inset-px rounded-2xl bg-gradient-to-r from-primary-500 to-indigo-500 opacity-30 blur group-hover:opacity-60 transition duration-300 -z-10 pointer-events-none"></div>
+                        
+                        <!-- Progress tracking bar -->
+                        <div id="btnProgressBar" class="absolute inset-y-0 left-0 bg-primary-400/40 w-0 transition-all duration-300 ease-out z-0 pointer-events-none"></div>
+
+                        <!-- Button content -->
+                        <div id="btnContent" class="relative z-10 flex items-center gap-2 transition-all duration-300">
+                            <span id="btnText">Generate Project Architecture</span>
+                            <i id="btnIcon" data-lucide="sparkles" class="w-5 h-5 text-white group-hover:rotate-12 transition-transform duration-300"></i>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Live Progress & Simulated Build Console -->
+                <div id="livePreview" class="mt-8 hidden bg-dark-950 border border-white/10 rounded-2xl overflow-hidden shadow-2xl transition-all duration-500 scale-95 opacity-0">
+                    <!-- Console Header -->
+                    <div class="bg-dark-900 px-5 py-3 border-b border-white/5 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></div>
+                            <span class="text-xs text-gray-400 font-mono">build_logs.log</span>
+                        </div>
+                        <span id="generatorStatus" class="text-xs text-gray-500 font-mono">Analyzing prompt...</span>
+                    </div>
+
+                    <!-- Console Logs Content -->
+                    <div class="p-6 font-mono text-xs text-green-400/90 leading-relaxed bg-black/40 h-64 overflow-y-auto space-y-2 select-text" id="terminalLogs">
+                        <!-- Simulated compilation lines will go here -->
+                    </div>
+
+                    <!-- Dynamic tags container -->
+                    <div class="px-6 py-4 bg-dark-900/60 border-t border-white/5">
+                        <span class="text-[10px] text-gray-500 font-mono uppercase tracking-wider block mb-2">Detected Tech Stack</span>
+                        <div id="detectedStack" class="flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="relative z-10 py-20 px-6">
+        <div class="max-w-[1400px] mx-auto">
+            <div class="text-center mb-16">
+                <span class="feature-chip text-xs font-medium px-3 py-1.5 rounded-full text-primary-300 inline-block mb-4">Project Preview</span>
+                <h2 class="font-heading text-4xl md:text-5xl font-bold mb-6">Preview Your Project Structure</h2>
+                <p class="text-gray-400 text-lg max-w-2xl mx-auto">
+                    Get a detailed view of your generated project before downloading.
+                </p>
+            </div>
+            
+            <div class="glass-light rounded-3xl overflow-hidden">
+                <div class="flex items-center gap-2 px-4 py-3 bg-dark-700 border-b border-dark-400 justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                    </div>
+                    <div class="flex-1 max-w-md bg-dark-600 rounded-full h-6 mx-4 flex items-center px-3 justify-center">
+                        <span class="text-xs text-gray-400 font-mono">Folder AI — Project Explorer</span>
+                    </div>
+                    <button id="downloadBtn" class="bg-gray-700 text-gray-500 text-xs font-semibold px-4 py-1.5 rounded-lg flex items-center gap-1.5 cursor-not-allowed transition-all duration-300" disabled>
+                        <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                        Download ZIP
+                    </button>
+                </div>
+                
+                <div class="flex flex-col md:flex-row h-auto md:h-[550px]">
+                    <!-- Left Sidebar File Explorer -->
+                    <div class="w-full md:w-72 bg-dark-800 border-b md:border-b-0 md:border-r border-dark-400 p-4 overflow-y-auto max-h-[250px] md:max-h-none">
+                        <div id="treeContainer" class="space-y-1 font-mono text-sm">
+                            <div class="text-gray-500 italic p-2 text-center">
+                                Generate a project structure to view files
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Code Editor -->
+                    <div class="flex-1 p-6 overflow-y-auto code-editor bg-dark-900/50 min-h-[300px] md:min-h-0">
+                        <div id="editorHeader" class="flex items-center justify-between mb-4 border-b border-dark-400/30 pb-3 hidden">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="file-code" class="w-5 h-5 text-blue-400"></i>
+                                <span id="editorTitle" class="text-sm text-gray-300 font-mono">src/components/App.tsx</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span id="editorLanguage" class="text-xs text-gray-500 font-mono bg-dark-600 px-2 py-1 rounded">TypeScript React</span>
+                            </div>
+                        </div>
+                        
+                        <div id="editorPlaceholder" class="flex flex-col items-center justify-center h-full text-gray-500">
+                            <i data-lucide="terminal" class="w-12 h-12 mb-2 text-dark-300"></i>
+                            <p class="text-sm font-mono">Select a file from the explorer to preview</p>
+                        </div>
+                        
+                        <pre id="editorPre" class="text-sm leading-6 hidden font-mono select-text"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Folder AI Section -->
+    <!-- Ultra Luxury Minimal Footer -->
+    <footer class="relative z-10 bg-black border-t border-white/5 py-16 px-6 font-sans">
+        <div class="max-w-[1200px] mx-auto">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 pb-12">
+                <!-- Column 1: Brand & Logo -->
+                <div class="col-span-2 md:col-span-1 space-y-4">
+                    <a href="/" class="flex items-center space-x-2">
+                        <div class="w-6 h-6 rounded bg-white flex items-center justify-center">
+                            <i data-lucide="folder-tree" class="w-4 h-4 text-black"></i>
+                        </div>
+                        <span class="font-heading font-bold text-lg text-white">Folder AI</span>
+                    </a>
+                    <p class="text-xs text-gray-500 max-w-[200px]">
+                        Compile production-ready project architectures dynamically.
+                    </p>
+                </div>
+
+                <!-- Column 2: Product -->
+                <div>
+                    <h4 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Product</h4>
+                    <ul class="space-y-3">
+                        <li><a href="/#features" class="text-gray-500 hover:text-white transition-colors text-xs">Features</a></li>
+                        <li><a href="/#how-it-works" class="text-gray-500 hover:text-white transition-colors text-xs">How It Works</a></li>
+                        <li><a href="/app" class="text-gray-500 hover:text-white transition-colors text-xs">Generator</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 3: Resources -->
+                <div>
+                    <h4 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Resources</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-500 hover:text-white transition-colors text-xs">Documentation</a></li>
+                        <li><a href="#" class="text-gray-500 hover:text-white transition-colors text-xs">API Reference</a></li>
+                        <li><a href="#" class="text-gray-500 hover:text-white transition-colors text-xs">Examples</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 4: Connect -->
+                <div>
+                    <h4 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Connect</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-500 hover:text-white transition-colors text-xs">GitHub</a></li>
+                        <li><a href="#" class="text-gray-500 hover:text-white transition-colors text-xs">Twitter</a></li>
+                        <li><a href="#" class="text-gray-500 hover:text-white transition-colors text-xs">Discord</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Bottom Sub-Footer -->
+            <div class="flex flex-col sm:flex-row justify-between items-center pt-8 border-t border-white/5 gap-4">
+                <div class="text-xs text-gray-500 font-mono">
+                    © 2023 Folder AI. All rights reserved.
+                </div>
+                
+                <!-- Social Links -->
+                <div class="flex items-center space-x-4">
+                    <a href="#" class="text-gray-500 hover:text-white transition-colors">
+                        <i data-lucide="github" class="w-4 h-4"></i>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-white transition-colors">
+                        <i data-lucide="twitter" class="w-4 h-4"></i>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-white transition-colors">
+                        <i data-lucide="linkedin" class="w-4 h-4"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Mouse follow light
+        const mouseLight = document.getElementById('mouseLight');
+        document.addEventListener('mousemove', (e) => {
+            mouseLight.style.left = `${e.clientX}px`;
+            mouseLight.style.top = `${e.clientY}px`;
+        });
+
+        // Header scroll effect
+        const header = document.getElementById('header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.classList.add('header-scrolled');
+            } else {
+                header.classList.remove('header-scrolled');
+            }
+        });
+
+        // Mobile menu
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const closeMobileMenu = document.getElementById('closeMobileMenu');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.remove('hidden');
+        });
+
+        closeMobileMenu.addEventListener('click', () => {
+            mobileMenu.classList.add('hidden');
+        });
+
+        // Close mobile menu when clicking on a link
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        });
+
+        // Accordion script block removed as accordion elements are deleted
+
+        // Counter animation
+        const counters = document.querySelectorAll('.counter');
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const counter = entry.target;
+                    const target = parseInt(counter.getAttribute('data-target'));
+                    const duration = 2000; // 2 seconds
+                    const start = performance.now();
+                    
+                    function updateCounter(currentTime) {
+                        const elapsed = currentTime - start;
+                        const progress = Math.min(elapsed / duration, 1);
+                        const easeOut = 1 - Math.pow(1 - progress, 3);
+                        const current = Math.floor(easeOut * target);
+                        counter.textContent = current + (target === 99 ? '%' : '+');
+                        if (progress < 1) {
+                            requestAnimationFrame(updateCounter);
+                        }
+                    }
+                    requestAnimationFrame(updateCounter);
+                    counterObserver.unobserve(counter);
+                }
+            });
+        }, { threshold: 0.5 });
+        
+        counters.forEach(counter => {
+            counterObserver.observe(counter);
+        });
+
+        // Scroll animations
+        const scrollElements = document.querySelectorAll('.card-hover, .tech-icon');
+        const scrollObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                    scrollObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        scrollElements.forEach(element => {
+            element.style.opacity = '0';
+            element.style.transform = 'translateY(20px)';
+            element.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            scrollObserver.observe(element);
+        });
+
+        // --- FOLDER AI CORE LOGIC ---
+        const aiPrompt = document.getElementById('aiPrompt');
+        const generateBtn = document.getElementById('generateBtn');
+        const livePreview = document.getElementById('livePreview');
+        const generatorStatus = document.getElementById('generatorStatus');
+        const detectedStack = document.getElementById('detectedStack');
+        const terminalLogs = document.getElementById('terminalLogs');
+        const charCount = document.getElementById('charCount');
+        
+        const treeContainer = document.getElementById('treeContainer');
+        const downloadBtn = document.getElementById('downloadBtn');
+        
+        const editorHeader = document.getElementById('editorHeader');
+        const editorTitle = document.getElementById('editorTitle');
+        const editorLanguage = document.getElementById('editorLanguage');
+        const editorPlaceholder = document.getElementById('editorPlaceholder');
+        const editorPre = document.getElementById('editorPre');
+
+        // State to store generated project structure
+        let generatedStructure = null;
+
+        // Auto-growing textarea & char count
+        aiPrompt.addEventListener('input', () => {
+            aiPrompt.style.height = 'auto';
+            aiPrompt.style.height = (aiPrompt.scrollHeight) + 'px';
+            charCount.textContent = aiPrompt.value.length;
+        });
+
+        // Preset pills click handler
+        const presets = document.querySelectorAll('.preset-pill');
+        presets.forEach(preset => {
+            preset.addEventListener('click', () => {
+                aiPrompt.value = preset.getAttribute('data-prompt');
+                aiPrompt.dispatchEvent(new Event('input'));
+                aiPrompt.focus();
+            });
+        });
+
+        // Logs print simulator with button progress bar synchronization
+        async function runTerminalSimulation(parsed) {
+            terminalLogs.innerHTML = '';
+            const btnProgressBar = document.getElementById('btnProgressBar');
+            const btnText = document.getElementById('btnText');
+            
+            const logs = [
+                { text: `[SYSTEM] Booting Folder AI compiler pipeline...`, delay: 100, progress: 5 },
+                { text: `[PARSE] Tokenizing natural language instructions...`, delay: 200, progress: 12 },
+                { text: `[PARSE] Extraction complete. Intent detected: ${parsed.language || 'Generic'} Full Stack Archetype`, delay: 150, progress: 20 },
+                { text: `[INFER] Selected Frontend Core: ${parsed.frontend || 'React (default)'}`, delay: 100, progress: 28 },
+                { text: `[INFER] Selected Backend Engine: ${parsed.backend || 'Flask (default)'}`, delay: 100, progress: 35 },
+                { text: `[INFER] Selected Storage Configuration: ${parsed.database || 'PostgreSQL (default)'}`, delay: 150, progress: 45 },
+                { text: `[INFER] Features list initialized: [${(parsed.features || []).join(', ') || 'basic'}]`, delay: 100, progress: 52 },
+                { text: `[TEMPLATE] Querying internal template generator database...`, delay: 150, progress: 60 },
+                { text: `[BUILD] Initializing directory construction on disk...`, delay: 200, progress: 70 },
+                { text: `[BUILD] Cleared target workspace directory: generated_project/`, delay: 100, progress: 75 },
+                { text: `[WRITE] Scaffolded project file nodes...`, delay: 250, progress: 85 },
+                { text: `[WRITE] Generated package.json dependency lists and scripts`, delay: 150, progress: 90 },
+                { text: `[WRITE] Created mock API controllers, models, and index entrypoints`, delay: 200, progress: 95 },
+                { text: `[SUCCESS] Output files successfully compiled on host file system!`, delay: 100, progress: 100, class: 'text-white font-bold bg-green-950/40 px-2 py-0.5 rounded border border-green-500/20' },
+                { text: `[SUCCESS] Folder AI Brain compilation step complete. Ready to preview.`, delay: 100, progress: 100, class: 'text-green-300 font-bold' }
+            ];
+
+            for (const log of logs) {
+                const line = document.createElement('div');
+                if (log.class) line.className = log.class;
+                line.innerHTML = `<span class="text-gray-600 select-none">$ </span>${log.text}`;
+                terminalLogs.appendChild(line);
+                terminalLogs.scrollTop = terminalLogs.scrollHeight;
+                
+                // Update button progress bar and text
+                btnProgressBar.style.width = `${log.progress}%`;
+                btnText.textContent = `Compiling Workspace... ${log.progress}%`;
+                
+                await new Promise(resolve => setTimeout(resolve, log.delay));
+            }
+        }
+
+        // Generate click handler
+        generateBtn.addEventListener('click', async () => {
+            const promptText = aiPrompt.value.trim();
+            if (!promptText) return;
+
+            // Show loading states on button
+            generateBtn.disabled = true;
+            const btnProgressBar = document.getElementById('btnProgressBar');
+            const btnText = document.getElementById('btnText');
+            const btnIcon = document.getElementById('btnIcon');
+            
+            btnProgressBar.style.width = '0%';
+            btnText.textContent = 'Analyzing Prompt...';
+            btnIcon.setAttribute('data-lucide', 'loader-2');
+            btnIcon.className = 'w-5 h-5 text-white animate-spin';
+            lucide.createIcons();
+            
+            // Show preview panel with smooth transition
+            livePreview.classList.remove('hidden');
+            setTimeout(() => {
+                livePreview.style.opacity = '1';
+                livePreview.style.transform = 'scale(1)';
+            }, 50);
+            
+            generatorStatus.textContent = 'Processing...';
+            detectedStack.innerHTML = '';
+            
+            treeContainer.innerHTML = '<div class="text-gray-500 italic p-4 text-center">Constructing project workspace...</div>';
+            
+            // Reset editor panel
+            editorHeader.classList.add('hidden');
+            editorPre.classList.add('hidden');
+            editorPlaceholder.classList.remove('hidden');
+            
+            // Disable Download Button
+            downloadBtn.disabled = true;
+            downloadBtn.className = "bg-gray-700 text-gray-500 text-xs font-semibold px-4 py-1.5 rounded-lg flex items-center gap-1.5 cursor-not-allowed transition-all duration-300";
+
+            try {
+                // Pre-loading text in console
+                terminalLogs.innerHTML = '<div class="text-gray-500 select-none">$ Initiating request...</div>';
+                
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ prompt: promptText })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    generatedStructure = data.structure;
+                    
+                    // Run the build terminal print logging simulation and button progress
+                    await runTerminalSimulation(data.parsed_prompt || {});
+                    
+                    generatorStatus.textContent = 'Success';
+                    
+                    // Render tags
+                    const parsed = data.parsed_prompt || {};
+                    const tags = [];
+                    if (parsed.language) tags.push({ name: parsed.language, type: 'language' });
+                    if (parsed.frontend) tags.push({ name: parsed.frontend, type: 'frontend' });
+                    if (parsed.backend) tags.push({ name: parsed.backend, type: 'backend' });
+                    if (parsed.database) tags.push({ name: parsed.database, type: 'database' });
+                    if (parsed.features && parsed.features.length) {
+                        parsed.features.forEach(f => tags.push({ name: f, type: 'feature' }));
+                    }
+
+                    detectedStack.innerHTML = tags.map(tag => {
+                        let colorClass = 'text-primary-300 bg-primary-600/20 border-primary-500/30';
+                        if (tag.type === 'language') colorClass = 'text-yellow-300 bg-yellow-600/20 border-yellow-500/30';
+                        if (tag.type === 'database') colorClass = 'text-green-300 bg-green-600/20 border-green-500/30';
+                        if (tag.type === 'feature') colorClass = 'text-purple-300 bg-purple-600/20 border-purple-500/30';
+                        return `<span class="border px-3 py-1 rounded-full text-xs font-mono font-medium ${colorClass}">${tag.name}</span>`;
+                    }).join('');
+
+                    // Populate dynamic tree
+                    renderTree(generatedStructure, treeContainer);
+                    
+                    // Enable Download Button
+                    downloadBtn.disabled = false;
+                    downloadBtn.className = "bg-green-600 hover:bg-green-500 text-white text-xs font-semibold px-4 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer shadow-lg shadow-green-900/30 transition-all duration-300 scale-105";
+                    
+                    // Make button show success check state
+                    generateBtn.className = "w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white font-heading font-semibold py-4 px-8 rounded-2xl flex items-center justify-center gap-3 transition-all duration-300 shadow-[0_0_30px_rgba(16,185,129,0.3)] relative overflow-hidden";
+                    btnText.textContent = "Workspace Compiled Successfully!";
+                    btnIcon.setAttribute('data-lucide', 'check-circle-2');
+                    btnIcon.className = "w-5 h-5 text-white animate-bounce";
+                    lucide.createIcons();
+
+                    // Scroll down to Project Preview Section
+                    setTimeout(() => {
+                        treeContainer.closest('section').scrollIntoView({ behavior: 'smooth' });
+                    }, 500);
+
+                    // Reset button after 4 seconds
+                    setTimeout(() => {
+                        generateBtn.disabled = false;
+                        generateBtn.className = "w-full bg-gradient-to-r from-primary-600 via-indigo-600 to-primary-500 text-white font-heading font-semibold py-4 px-8 rounded-2xl flex items-center justify-center gap-3 transition-all duration-300 transform active:scale-[0.99] hover:shadow-[0_0_30px_rgba(76,110,245,0.3)] relative overflow-hidden cursor-pointer";
+                        btnText.textContent = "Generate Project Architecture";
+                        btnIcon.setAttribute('data-lucide', 'sparkles');
+                        btnIcon.className = "w-5 h-5 text-white group-hover:rotate-12 transition-transform duration-300";
+                        btnProgressBar.style.width = '0%';
+                        lucide.createIcons();
+                    }, 4000);
+
+                } else {
+                    generatorStatus.textContent = 'Error';
+                    terminalLogs.innerHTML = `<div class="text-red-400 p-2">$ Error: ${data.error || 'Failed to generate project structure.'}</div>`;
+                    treeContainer.innerHTML = '<div class="text-red-400 p-4 text-center">Generation failed. Please try again.</div>';
+                    resetGenerateButtonError();
+                }
+            } catch (err) {
+                console.error(err);
+                generatorStatus.textContent = 'Network Error';
+                terminalLogs.innerHTML = '<div class="text-red-400 p-2">$ Error: Connection to backend host failed. Check Flask console.</div>';
+                treeContainer.innerHTML = '<div class="text-red-400 p-4 text-center">Network error. Is Flask running?</div>';
+                resetGenerateButtonError();
+            }
+        });
+
+        function resetGenerateButtonError() {
+            const btnText = document.getElementById('btnText');
+            const btnIcon = document.getElementById('btnIcon');
+            const btnProgressBar = document.getElementById('btnProgressBar');
+            
+            generateBtn.disabled = false;
+            generateBtn.className = "w-full bg-gradient-to-r from-red-600 to-rose-600 text-white font-heading font-semibold py-4 px-8 rounded-2xl flex items-center justify-center gap-3 transition-all duration-300 shadow-[0_0_30px_rgba(244,63,94,0.3)] relative overflow-hidden";
+            btnText.textContent = "Compilation Failed — Retry";
+            btnIcon.setAttribute('data-lucide', 'alert-circle');
+            btnIcon.className = "w-5 h-5 text-white";
+            btnProgressBar.style.width = '0%';
+            lucide.createIcons();
+            
+            setTimeout(() => {
+                generateBtn.className = "w-full bg-gradient-to-r from-primary-600 via-indigo-600 to-primary-500 text-white font-heading font-semibold py-4 px-8 rounded-2xl flex items-center justify-center gap-3 transition-all duration-300 transform active:scale-[0.99] hover:shadow-[0_0_30px_rgba(76,110,245,0.3)] relative overflow-hidden cursor-pointer";
+                btnText.textContent = "Generate Project Architecture";
+                btnIcon.setAttribute('data-lucide', 'sparkles');
+                btnIcon.className = "w-5 h-5 text-white group-hover:rotate-12 transition-transform duration-300";
+                lucide.createIcons();
+            }, 3000);
+        }
+
+        // Download ZIP click handler
+        downloadBtn.addEventListener('click', () => {
+            if (downloadBtn.disabled || !generatedStructure) return;
+            
+            // Submit a POST form with structure_json to reconstruct & download the exact previewed structure
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/download';
+            form.style.display = 'none';
+
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'structure_json';
+            input.value = JSON.stringify(generatedStructure);
+
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+        });
+
+        // Recursive tree rendering function
+        function renderTree(structure, parentElement) {
+            parentElement.innerHTML = '';
+            
+            function renderNode(name, data, isFolder, element, depth) {
+                const nodeContainer = document.createElement('div');
+                nodeContainer.className = 'flex flex-col';
+                
+                const row = document.createElement('div');
+                row.className = 'flex items-center gap-2 cursor-pointer hover:bg-dark-500/50 p-1.5 rounded transition-all duration-150 group';
+                row.style.paddingLeft = `${depth * 1.25}rem`;
+                
+                const chevron = document.createElement('i');
+                if (isFolder) {
+                    chevron.setAttribute('data-lucide', 'chevron-down');
+                    chevron.className = 'w-4 h-4 text-gray-500 transition-transform duration-200';
+                } else {
+                    chevron.className = 'w-4 h-4 opacity-0';
+                }
+                row.appendChild(chevron);
+                
+                const icon = document.createElement('i');
+                if (isFolder) {
+                    icon.setAttribute('data-lucide', 'folder');
+                    icon.className = 'w-4 h-4 text-primary-400 group-hover:scale-105 transition-transform';
+                } else {
+                    const extension = name.split('.').pop().toLowerCase();
+                    let iconName = 'file';
+                    let iconClass = 'text-gray-400';
+                    if (['py', 'js', 'jsx', 'ts', 'tsx', 'html', 'css', 'go', 'rs', 'java', 'cpp', 'c', 'php', 'rb'].includes(extension)) {
+                        iconName = 'file-code';
+                        iconClass = 'text-blue-400';
+                    } else if (extension === 'json') {
+                        iconName = 'file-json';
+                        iconClass = 'text-yellow-400';
+                    } else if (['md', 'txt'].includes(extension)) {
+                        iconName = 'file-text';
+                        iconClass = 'text-green-400';
+                    }
+                    icon.setAttribute('data-lucide', iconName);
+                    icon.className = `w-4 h-4 ${iconClass} group-hover:scale-105 transition-transform`;
+                }
+                row.appendChild(icon);
+                
+                const span = document.createElement('span');
+                span.textContent = name;
+                span.className = isFolder ? 'text-gray-300 font-medium font-mono text-xs' : 'text-gray-400 font-mono text-xs';
+                row.appendChild(span);
+                
+                nodeContainer.appendChild(row);
+                element.appendChild(nodeContainer);
+                
+                if (isFolder) {
+                    const childrenContainer = document.createElement('div');
+                    childrenContainer.className = 'transition-all duration-200';
+                    nodeContainer.appendChild(childrenContainer);
+                    
+                    renderTreeNodes(data, childrenContainer, depth + 1);
+                    
+                    row.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const isCollapsed = childrenContainer.classList.contains('hidden');
+                        if (isCollapsed) {
+                            childrenContainer.classList.remove('hidden');
+                            chevron.style.transform = 'rotate(0deg)';
+                        } else {
+                            childrenContainer.classList.add('hidden');
+                            chevron.style.transform = 'rotate(-90deg)';
+                        }
+                    });
+                } else {
+                    row.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        // Highlight active file
+                        document.querySelectorAll('#treeContainer .bg-dark-600').forEach(el => {
+                            el.classList.remove('bg-dark-600');
+                        });
+                        row.classList.add('bg-dark-600');
+                        
+                        showFileContent(name);
+                    });
+                }
+            }
+            
+            function renderTreeNodes(nodes, container, depth) {
+                if (!nodes) return;
+                // Sort: folders first, then files
+                const sortedKeys = Object.keys(nodes).sort((a, b) => {
+                    const isFolderA = typeof nodes[a] === 'object' && nodes[a] !== null;
+                    const isFolderB = typeof nodes[b] === 'object' && nodes[b] !== null;
+                    if (isFolderA && !isFolderB) return -1;
+                    if (!isFolderA && isFolderB) return 1;
+                    return a.localeCompare(b);
+                });
+                
+                sortedKeys.forEach(key => {
+                    const value = nodes[key];
+                    const isFolder = typeof value === 'object' && value !== null;
+                    const child = document.createElement('div');
+                    container.appendChild(child);
+                    renderNode(key, value, isFolder, child, depth);
+                });
+            }
+            
+            renderTreeNodes(structure, parentElement, 0);
+            lucide.createIcons();
+        }
+
+        // Show mock file contents in the code editor previewer
+        function showFileContent(filename) {
+            editorHeader.classList.remove('hidden');
+            editorPre.classList.remove('hidden');
+            editorPlaceholder.classList.add('hidden');
+            
+            editorTitle.textContent = filename;
+            
+            const extension = filename.split('.').pop().toLowerCase();
+            let langText = 'Plain Text';
+            let code = '';
+            
+            if (extension === 'py') {
+                langText = 'Python';
+                code = `import os
+import sys
+
+# Generated automatically by Folder AI structure generator
+# This file serves as the boilerplate entrypoint for this module.
+
+def main():
+    print("Welcome to ${filename} module!")
+    print("Python runtime environment successfully initialized.")
+
+if __name__ == "__main__":
+    main()`;
+            } else if (['js', 'jsx'].includes(extension)) {
+                langText = 'JavaScript React';
+                code = `// Generated by Folder AI react template
+import React, { useState, useEffect } from 'react';
+
+export default function Component() {
+    const [status, setStatus] = useState('initialized');
+
+    return (
+        <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
+            <h2>Hello from ${filename}!</h2>
+            <p>Component is currently: <strong>{status}</strong></p>
+        </div>
+    );
+}`;
+            } else if (['ts', 'tsx'].includes(extension)) {
+                langText = 'TypeScript React';
+                code = `// Generated by Folder AI react-ts template
+import React from 'react';
+
+interface Props {
+    title?: string;
+    description?: string;
+}
+
+export const Component: React.FC<Props> = ({ 
+    title = "Boilerplate Component", 
+    description = "Generated by Folder AI" 
+}) => {
+    return (
+        <div className="p-6 border rounded-xl shadow-sm bg-white">
+            <h3 className="text-xl font-bold text-gray-800">{title}</h3>
+            <p className="mt-2 text-gray-600">{description}</p>
+        </div>
+    );
+};`;
+            } else if (extension === 'json') {
+                langText = 'JSON';
+                code = `{
+  "name": "folder-ai-inferred-project",
+  "version": "1.0.0",
+  "description": "Production-ready structure generated by Folder AI",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \\"Error: no test specified\\" && exit 0"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "private": true
+}`;
+            } else if (extension === 'md') {
+                langText = 'Markdown';
+                code = `# Generated Project: Folder AI
+
+This project directory structure and config files were generated automatically from a natural language prompt.
+
+## 🚀 Getting Started
+
+Follow the configuration files inside individual directories to set up your environment.
+
+1. Install dependencies specific to your framework templates.
+2. Initialize database endpoints as configured.
+3. Enjoy building your application!
+
+*Generated with ❤️ by Folder AI.*`;
+            } else if (extension === 'html') {
+                langText = 'HTML';
+                code = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generated Boilerplate</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #fafafa; }
+        .card { padding: 3rem; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Hello from ${filename}</h1>
+        <p>This UI is ready for your customizations.</p>
+    </div>
+</body>
+</html>`;
+            } else {
+                langText = extension.toUpperCase();
+                code = `# Generated template file: ${filename}
+# Populate with your business logic.`;
+            }
+            
+            editorLanguage.textContent = langText;
+            
+            // Escape HTML characters
+            const escapedCode = code
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+                
+            const lines = escapedCode.split('\n');
+            let formattedHTML = '';
+            lines.forEach((line, index) => {
+                formattedHTML += `<span class="text-gray-500 inline-block w-8 text-right select-none pr-3 mr-2 border-r border-dark-400/20">${index + 1}</span><span class="text-gray-300 font-mono text-xs">${line}</span>\n`;
+            });
+            
+            editorPre.innerHTML = formattedHTML;
+        }
+    </script>
+</body>
+</html>
